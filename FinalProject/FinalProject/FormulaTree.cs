@@ -9,10 +9,11 @@ namespace FinalProject
 {
     class FormulaTree : Tree
     {
-        
+
         private int m_num_of_variables;
 
-        public FormulaTree() : base()
+        public FormulaTree()
+            : base()
         {
             Console.WriteLine("FormulaTree defualt c'tor");
             m_num_of_variables = 0;

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 // Parsing to text file
-//#define FILE_PATH @"C:\Users\mantz\Documents\GitHub\Final_Project\tree_input.txt"
+//#define FILE_PATH @"C:\Users\vered\Documents\GitHub\Final_Project\tree_input.txt"
 
 
 namespace FinalProject
@@ -14,9 +14,9 @@ namespace FinalProject
 
     class TreeUtils
     {
-        #if XCV
-            const string FILE_NAME = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\tree_input.txt";
-        #endif
+#if XCV
+        const string FILE_NAME = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_input.txt";
+#endif
 
         public static FormulaTree read_tree_from_file()
         {
@@ -24,13 +24,14 @@ namespace FinalProject
             string line;
             int depth_counter = 0;
             bool flag_found_char = false;
-            FormulaTree formula_tree = new FormulaTree() ;
+            FormulaTree formula_tree = new FormulaTree();
             // Read the text file
-            if (File.Exists(FILE_NAME)) {
+            if (File.Exists(FILE_NAME))
+            {
                 fs = new FileStream(FILE_NAME, FileMode.Open, FileAccess.Read);
                 StreamReader reader = new StreamReader(fs);
 
-                int i_alphabeth_size = (reader.Read())-48; // Read single char in the file
+                int i_alphabeth_size = (reader.Read()) - 48; // Read single char in the file
                 // Create a new n-ary tree
                 reader.ReadLine(); // Ignore the rest of the first line
                 line = reader.ReadLine();
@@ -45,22 +46,22 @@ namespace FinalProject
                 {
                     type = node_type.OR;
                 }
-                Console.WriteLine("tree c'tor({0},{1},{2})", i_alphabeth_size, s_node_name ,type);
+                Console.WriteLine("tree c'tor({0},{1},{2})", i_alphabeth_size, s_node_name, type);
 
                 // Initialize the root of the formula tree
-                Node tmp_node = new LogicNode(s_node_name, type, 0,i_alphabeth_size,null);
+                Node tmp_node = new LogicNode(s_node_name, type, 0, i_alphabeth_size, null);
                 formula_tree.set_initial_tree(i_alphabeth_size, tmp_node);
                 LogicNode logic_tmp_node = new LogicNode();
                 LogicNode logic_parent_node = new LogicNode();
                 while ((line = reader.ReadLine()) != null)
                 {
                     logic_tmp_node = (LogicNode)formula_tree.get_root();
-                    
+
                     // Start adding a child only if it's not the root
                     for (int i = 2; i < line.Length; i = i + 2)
                     {
                         s_node_name = line[i].ToString();
-                        s_node_type = line[i+1].ToString();
+                        s_node_type = line[i + 1].ToString();
                         logic_parent_node = logic_tmp_node;
                         if (s_node_type == "0")
                         {

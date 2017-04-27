@@ -32,9 +32,14 @@ namespace FinalProject
             {
                 Node n = s.Pop();
                 preorder_queue.Add(n);
-                
+
                 // Do Action
                 Console.Write(n.get_node_name());
+                if (n.get_children() == null)
+                {
+                    position++;
+                    return (position < preorder_queue.Count());
+                }
                 foreach (var child in n.get_children().ToArray().Reverse())
                 {
                     if (child != null)
@@ -45,7 +50,7 @@ namespace FinalProject
             }
             position++;
             return (position < preorder_queue.Count());
-            
+
         }
 
         public void Reset()
@@ -63,7 +68,8 @@ namespace FinalProject
             }
         }
 
-        public object Current {
+        public object Current
+        {
             get
             {
                 try
@@ -76,6 +82,6 @@ namespace FinalProject
                 }
             }
         }
-        }
-
     }
+
+}

@@ -13,34 +13,41 @@ namespace FinalProject
         // protected int m_literal_idx;
         protected int m_value;
 
-        public LogicNode() : base()
+        public LogicNode()
+            : base()
         {
             Console.WriteLine("LogicNode defult c'tor");
-            m_children = (List<LogicNode>)m_children;
-            for (int i = 0; i < m_number_of_children; i++)
+            m_children = new LogicNode[m_num_of_children];
+            for (int i = 0; i < m_num_of_children; i++)
             {
                 m_children[i] = null;
             }
             //m_literal_idx = 0;
-            m_value = -1;
+            m_value = INVALID_VALUE;
         }
         public LogicNode(string name, node_type type, int depth, int number_of_children, LogicNode parent) :
             base(name, type, depth, number_of_children, parent)
         {
             Console.WriteLine("LogicNode c'tor");
-            // m_children = new LogicNode[m_number_of_children];
-            m_children = new List<LogicNode>();
-            for (int i = 0; i < m_number_of_children; i++)
+            m_children = new LogicNode[m_num_of_children];
+            for (int i = 0; i < m_num_of_children; i++)
             {
                 m_children[i] = null;
             }
             //m_literal_idx = 0;
-            m_value = -1;
+            m_value = INVALID_VALUE;
+        }
+
+        public LogicNode(Node node)
+            : base(node)
+        {
+            m_value = INVALID_VALUE;
+            m_children = new LogicNode[m_num_of_children];
         }
 
         public LogicNode get_child(string child_name)
         {
-            for (int i = 0; i<m_number_of_children; i++)
+            for (int i = 0; i < m_num_of_children; i++)
                 if ((m_children[i] != null) && (m_children[i].get_node_name() == child_name)) return (LogicNode)m_children[i];
             return null;
         }
@@ -54,13 +61,15 @@ namespace FinalProject
             // else - if the node isn't a leaf (a gate) then calculate it's children values and execute or\and between it's values
             int left_child_value = m_children[0].calculate_value(input_vector);
             int right_child_value = m_children[1].calculate_value(input_vector);
-            if ( m_type == node_type.AND )
+            if (m_type == node_type.AND)
             {
                 m_value = left_child_value & right_child_value;
-            } else if ( m_type == node_type.OR )
+            }
+            else if (m_type == node_type.OR)
             {
                 m_value = left_child_value | right_child_value;
-            } else
+            }
+            else
             {
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", m_type.ToString());
             }
@@ -76,8 +85,6 @@ namespace FinalProject
                  return; 
               }
          }*/
-
-        
 
 
 

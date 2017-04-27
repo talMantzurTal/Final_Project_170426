@@ -31,9 +31,19 @@ namespace FinalProject
             m_num_of_children = num_of_children;
         }
 
-        public Node get_root()
+        public Tree(Tree tree)
         {
-            return m_root;
+            Console.WriteLine("Tree c'tor");
+            m_root = tree.get_root();
+            m_depth = m_root.get_depth();
+            m_num_of_children = m_root.get_num_of_children();
+        }
+
+        public Node get_root(copy_flags flag = copy_flags.SHALLOW)
+        {
+            if (flag == copy_flags.SHALLOW) return m_root;
+
+            return m_root.deep_copy();
         }
 
         public void set_initial_tree(int i_alphabeth_size, Node root_node)
@@ -52,7 +62,7 @@ namespace FinalProject
             {
                 var n = s.Pop();
                 // if search_flag then search a node by name and return it
-                if ( search_flag && (n.get_node_name().Equals(name_to_search)) )
+                if (search_flag && (n.get_node_name().Equals(name_to_search)))
                 {
                     return n;
                 }
@@ -83,34 +93,57 @@ namespace FinalProject
 
         public Tree deep_copy()
         {
-            Tree tree_to_return = new Tree(m_num_of_children, m_root);
+            Node cloned_root = m_root.deep_copy();
+            Tree cloned_tree = new Tree(m_num_of_children, cloned_root);
             string name;
-            node_type type;
-            int depth;
-            int number_of_children;
-            Node parent;
-            Node[] children;
-            bool if_leaf;
-            int leaf_idx;
-            int last_child_idx;
+
+            // Deep copy and add to the tree all nodes axcept the root (which is already in it)
+#if v
+            var this_enum = this.GetEnumerator();
+            var cloned_enum = cloned_tree.GetEnumerator();
+            while (this_enum.MoveNext() && cloned_enum.MoveNext())
+            {
+                var node = (Node)this_enum.Current;
+                var cloned_node = (Node)cloned_enum.Current;
+
+                name = node.get_node_name();
+                //if ( name == m_root.get_node_name() ) continue;
+
+                Node[] children = node.get_children();
+                foreach (Node child in children)
+                {
+                    if (child == null) continue;
+                  //  if (child == null) return null;
+                    // If node != root
+                    Node tmp_child_node = child.deep_copy();
+                    cloned_node.set_child(tmp_child_node);
+                }
+            }
+#endif
 
             foreach (Node node in this)
+                {
+                    name = node.get_node_name();
+                    //if ( name ot.get_== m_ronode_name() ) continue;
+
+                    Node[] children = node.get_children();
+                    Node clone_curr_node = Tree.preOrder(cloned_root,name,true);
+                    foreach (Node child in children)
+                    {
+                        if (child == null) continue;
+                        // If node != root
+                        Node tmp_child_node = child.deep_copy();
+                        clone_curr_node.set_child(tmp_child_node);
+                    }
+
+                }
+            Console.WriteLine("DEEP COPY:\n------------");
+
+            foreach (Node node in cloned_tree)
             {
-                name = node.get_node_name();
-                type = node.get_type();
-                depth = node.get_depth();
-                number_of_children = node.get_num_of_children();
-                parent = node.get_parent();
-                children = node.get_children();
-                if_leaf = node.get_if_leaf();
-                leaf_idx = node.get_leaf_idx();
-
-                Node tmp_node = new Node(name, type, depth, number_of_children, parent);
-                tmp_node.set_leaf_idx(leaf_idx);
-                tmp_node.set_if_leaf(if_leaf);
-
+                Console.WriteLine(node.get_node_name());
             }
-            return null;
+            return cloned_tree;
         }
     }
 }

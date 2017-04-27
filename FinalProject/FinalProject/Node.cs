@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace FinalProject
 {
-    class Node 
+    class Node
     {
         protected string m_name;
         protected node_type m_type;
-        protected int m_my_depth;
-        protected int m_number_of_children;
+        protected int m_depth;
+        protected int m_num_of_children;
         protected Node m_parent;
-        protected List<Node> m_children;
+        protected Node[] m_children;
         protected bool m_if_leaf;
         protected int m_leaf_idx;
         protected int m_last_child_idx;
@@ -24,42 +24,42 @@ namespace FinalProject
         {
             Console.WriteLine("Node c'tor");
             m_type = node_type.NA;
-            m_my_depth = 0;
-            m_number_of_children = 0;
+            m_depth = 0;
+            m_num_of_children = 0;
             m_parent = null;
             m_name = "new node";
-           // m_children = new List<Node>();
+            m_children = null;
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
-        
+
         }
 
         public Node(string name, node_type type, int depth, int number_of_children, Node parent)
         {
             Console.WriteLine("Node c'tor");
             m_type = type;
-            m_my_depth = depth;
-            m_number_of_children = number_of_children;
+            m_depth = depth;
+            m_num_of_children = number_of_children;
             m_parent = parent;
             m_name = name;
+            m_children = null;
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
-            //m_children = new List<Node>();
         }
 
         public Node(Node node)
         {
             m_type = node.get_type();
-            m_my_depth = node.get_depth();
-            m_number_of_children = node.get_num_of_children();
+            m_depth = node.get_depth();
+            m_num_of_children = node.get_num_of_children();
             m_parent = node.get_parent();
             m_name = node.get_node_name();
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
-            //m_children = new List<Node>();
+            m_children = null;
             // m_children = node.get_children();
         }
 
@@ -80,7 +80,7 @@ namespace FinalProject
         {
             this.m_parent = parent;
         }
-        
+
         public void add_child(Node new_child)
         {
             // Create a tmp_node to add as a child
@@ -93,11 +93,11 @@ namespace FinalProject
 
             // Add tmp_node as a child
             int child_idx = 0;
-            while ((child_idx < m_number_of_children) && (m_children[child_idx] != null) )
+            while ((child_idx < m_num_of_children) && (m_children[child_idx] != null))
             {
                 child_idx++;
             }
-            if (child_idx == m_number_of_children)
+            if (child_idx == m_num_of_children)
             {
                 throw new System.ArgumentException("Can't add another child, there are already {0} children to this node", child_idx.ToString());
             }
@@ -105,15 +105,28 @@ namespace FinalProject
             return;
         }
 
-        
+
 
         public bool set_child(Node child_to_add)
         {
             int i = 0;
+            if (m_children == null) {
+                m_children = new Node[m_num_of_children];
+                for (int child_idx = 0; child_idx < m_num_of_children; child_idx++)
+                    m_children[child_idx] = null;
+            }
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if (m_children[0] == null) m_if_leaf = false;
-            while ( (i < m_number_of_children) && (m_children[i] != null) ) i++;
-            if ( i == m_number_of_children) return false;
-            else m_children[i] = child_to_add;
+            while ((i < m_num_of_children) && (m_children[i] != null)) i++;
+            if (i == m_num_of_children) return false;
+            else
+            {
+                Type t = this.GetType();
+                if (t.Equals(typeof(LogicNode)))
+                    m_children[i] = new LogicNode(child_to_add);
+                else m_children[i] = new PartyNode(child_to_add);
+                //else m_children[i] = Activator.CreateInstance<t>();
+            }
             return true;
         }
 
@@ -137,14 +150,14 @@ namespace FinalProject
             m_leaf_idx = leaf_idx;
         }
 
-        public Node get_parent()
+        public Node get_parent(copy_flags flag = copy_flags.SHALLOW)
         {
             return m_parent;
         }
 
         public int get_depth()
         {
-            return m_my_depth;
+            return m_depth;
         }
 
 
@@ -155,42 +168,41 @@ namespace FinalProject
 
         public int get_num_of_children()
         {
-            return m_number_of_children;
+            return m_num_of_children;
         }
 
-        public List<Node> get_children()
+        public Node[] get_children(copy_flags flag = copy_flags.SHALLOW)
         {
-            List<Node> children_to_return = new List<Node>();
-            string name;
-            node_type type;
-            int depth;
-            int number_of_children;
-            Node parent;
-            Node[] children;
-            bool if_leaf;
-            int leaf_idx;
-            int last_child_idx;
+            if (flag == copy_flags.SHALLOW) return m_children;
+
+            // Deep copy
+            Node[] children_to_return = new Node[m_num_of_children];
+            int child_idx = 0;
+
 
             foreach (Node node in m_children)
             {
-                if (node != null)
-                {
-                    name = node.get_node_name();
-                    type = node.get_type();
-                    depth = node.get_depth();
-                    number_of_children = node.get_num_of_children();
-                    parent = node.get_parent();
-                    if_leaf = node.get_if_leaf();
-                    leaf_idx = node.get_leaf_idx();
-
-                    Node tmp_node = new Node(name, type, depth, number_of_children, parent);
-                    tmp_node.set_leaf_idx(leaf_idx);
-                    tmp_node.set_if_leaf(if_leaf);
-
-                    children_to_return.ToList<Node>().Add(tmp_node);
-                }
+                if ((node != null) && (!node.m_if_leaf))
+                    children_to_return[child_idx] = node.deep_copy();
             }
             return children_to_return;
+        }
+
+        /* Deep copy a node without pointers to it's parent and children */
+        public virtual Node deep_copy()
+        {
+            string name = m_name;
+            node_type type = m_type;
+            int depth = m_depth;
+            int number_of_children = m_num_of_children;
+            bool if_leaf = m_if_leaf;
+            int leaf_idx = m_leaf_idx;
+
+            Node tmp_node = new Node(name, type, depth, number_of_children, /* parent = */null);
+            tmp_node.set_leaf_idx(leaf_idx);
+            tmp_node.set_if_leaf(if_leaf);
+
+            return tmp_node;
         }
 
         public virtual int calculate_value(int[] input_vector)
