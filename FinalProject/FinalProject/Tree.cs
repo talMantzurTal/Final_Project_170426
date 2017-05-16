@@ -35,7 +35,7 @@ namespace FinalProject
         {
             Console.WriteLine("Tree c'tor");
             m_root = tree.get_root();
-            m_depth = m_root.get_depth();
+            m_depth = tree.get_depth();
             m_num_of_children = m_root.get_num_of_children();
         }
 
@@ -91,35 +91,15 @@ namespace FinalProject
             return new TreeEnum(this);
         }
 
-        public Tree deep_copy()
+        public Tree deep_copy(Tree cloned_tree)
         {
-            Node cloned_root = m_root.deep_copy();
-            Tree cloned_tree = new Tree(m_num_of_children, cloned_root);
+            /* Todo: 1.Deep copy should be virtual function in all node kinds. at each "special" node, this routine will call the base routine
+             *       2.check the type of m_root and create clone_tree and cloned_root according to that type.*/
+
+            Node cloned_root = cloned_tree.get_root();
             string name;
 
             // Deep copy and add to the tree all nodes axcept the root (which is already in it)
-#if v
-            var this_enum = this.GetEnumerator();
-            var cloned_enum = cloned_tree.GetEnumerator();
-            while (this_enum.MoveNext() && cloned_enum.MoveNext())
-            {
-                var node = (Node)this_enum.Current;
-                var cloned_node = (Node)cloned_enum.Current;
-
-                name = node.get_node_name();
-                //if ( name == m_root.get_node_name() ) continue;
-
-                Node[] children = node.get_children();
-                foreach (Node child in children)
-                {
-                    if (child == null) continue;
-                  //  if (child == null) return null;
-                    // If node != root
-                    Node tmp_child_node = child.deep_copy();
-                    cloned_node.set_child(tmp_child_node);
-                }
-            }
-#endif
 
             foreach (Node node in this)
                 {
@@ -131,8 +111,8 @@ namespace FinalProject
                     foreach (Node child in children)
                     {
                         if (child == null) continue;
-                        // If node != root
                         Node tmp_child_node = child.deep_copy();
+        
                         clone_curr_node.set_child(tmp_child_node);
                     }
 
@@ -144,6 +124,23 @@ namespace FinalProject
                 Console.WriteLine(node.get_node_name());
             }
             return cloned_tree;
+        }
+
+        public int get_depth()
+        {
+            return m_depth;
+        }
+
+        public void set_depth()
+        {
+            int max_depth = 0;
+            foreach (Node node in this)
+            {
+                if ((node.get_if_leaf()) && (max_depth < node.get_depth()))
+                    max_depth = node.get_depth();
+            }
+            m_depth = max_depth + 1; // TODO: ask Ran Gelles about the depth
+
         }
     }
 }

@@ -54,7 +54,8 @@ namespace FinalProject
             m_type = node.get_type();
             m_depth = node.get_depth();
             m_num_of_children = node.get_num_of_children();
-            m_parent = node.get_parent();
+          //  m_parent = node.get_parent();
+            m_parent = null; //vered change
             m_name = node.get_node_name();
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
@@ -81,8 +82,36 @@ namespace FinalProject
             this.m_parent = parent;
         }
 
-        public void add_child(Node new_child)
+        public void add_child(Node new_child, int child_to_add_idx = -1, copy_flags flag = copy_flags.SHALLOW)
         {
+            // Find the first empty child which hasn't been assigned 
+            int child_idx = 0;
+            if (child_to_add_idx == INVALID_VALUE)
+            {
+                while ((child_idx < m_num_of_children) && (m_children[child_idx] != null))
+                {
+                    child_idx++;
+                }
+            }
+            else child_idx = child_to_add_idx;
+
+            // Change m_if_leaf to false.
+            m_if_leaf = false;
+
+            // If flag = shallow copy, the new child is the pointer that accepted 
+            // "new_child", including it's subtree if exist.
+            // -----------------------------------------------------------------------
+            if (flag == copy_flags.SHALLOW)
+            {
+                this.m_children[child_idx] = new_child;
+                new_child.set_parent(this);
+                // Set child's depth
+                m_children[child_idx].m_depth = this.m_depth + 1;
+                return;
+            }
+            // If flag = deep copy, create a new tmp_node and add this node as a child
+            // without it's subtree
+            // -----------------------------------------------------------------------
             // Create a tmp_node to add as a child
             string name = new_child.get_node_name();
             node_type type = new_child.get_type();
@@ -91,32 +120,36 @@ namespace FinalProject
             Node parent = new_child.get_parent();
             Node tmp_node = new Node(name, type, depth, num_of_children, parent);
 
-            // Add tmp_node as a child
-            int child_idx = 0;
-            while ((child_idx < m_num_of_children) && (m_children[child_idx] != null))
-            {
-                child_idx++;
-            }
+
+            // Set tmp_node.if_leaf = true
+            tmp_node.m_if_leaf = true;
+
             if (child_idx == m_num_of_children)
             {
                 throw new System.ArgumentException("Can't add another child, there are already {0} children to this node", child_idx.ToString());
             }
+            // Add tmp_node as a child
             m_children[child_idx] = tmp_node;
+            m_children[child_idx].m_depth = this.m_depth + 1;
             return;
         }
 
 
 
-        public bool set_child(Node child_to_add)
+        public bool set_child(Node child_to_add, copy_flags flag = copy_flags.SHALLOW)
         {
+
             int i = 0;
             if (m_children == null) {
                 m_children = new Node[m_num_of_children];
                 for (int child_idx = 0; child_idx < m_num_of_children; child_idx++)
                     m_children[child_idx] = null;
             }
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if (m_children[0] == null) m_if_leaf = false;
+
+            // Change m_if_leaf to false.
+            m_if_leaf = false;
+
+            // Find the first empty child which hasn't been assigned 
             while ((i < m_num_of_children) && (m_children[i] != null)) i++;
             if (i == m_num_of_children) return false;
             else
@@ -124,8 +157,19 @@ namespace FinalProject
                 Type t = this.GetType();
                 if (t.Equals(typeof(LogicNode)))
                     m_children[i] = new LogicNode(child_to_add);
+                      
                 else m_children[i] = new PartyNode(child_to_add);
-                //else m_children[i] = Activator.CreateInstance<t>();
+                
+                m_children[i].m_parent = this; /////// vered change
+            }
+
+            // Set children depth
+            m_children[i].m_depth = this.m_depth + 1;
+            if (m_children[i].m_if_leaf) return true;
+            Tree tmp_tree_for_depth = new Tree(m_num_of_children,m_children[i]);
+            foreach (Node node in tmp_tree_for_depth)
+            {
+                node.m_depth = node.get_parent().get_depth() + 1;
             }
             return true;
         }
@@ -224,6 +268,8 @@ namespace FinalProject
         {
             m_if_leaf = if_leaf;
         }
+
+        
 
 
 

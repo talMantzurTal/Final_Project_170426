@@ -15,7 +15,8 @@ namespace FinalProject
     class TreeUtils
     {
 #if XCV
-        const string FILE_NAME = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_input.txt";
+        const string FILE_NAME_IN = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_input.txt";
+        const string FILE_NAME_OUT = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_output.txt";
 #endif
 
         public static FormulaTree read_tree_from_file()
@@ -26,9 +27,9 @@ namespace FinalProject
             bool flag_found_char = false;
             FormulaTree formula_tree = new FormulaTree();
             // Read the text file
-            if (File.Exists(FILE_NAME))
+            if (File.Exists(FILE_NAME_IN))
             {
-                fs = new FileStream(FILE_NAME, FileMode.Open, FileAccess.Read);
+                fs = new FileStream(FILE_NAME_IN, FileMode.Open, FileAccess.Read);
                 StreamReader reader = new StreamReader(fs);
 
                 int i_alphabeth_size = (reader.Read()) - 48; // Read single char in the file
@@ -83,5 +84,33 @@ namespace FinalProject
             else Console.WriteLine("Text file doesn't exist");
             return formula_tree;
         } // End of function "read_tree_from_file"
+
+        public static void write_tree_to_file(Tree tree_2_print)
+        {
+
+            using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_NAME_OUT))
+            {
+
+                string node_name;
+                string s_node_type = "";
+                foreach (Node node in tree_2_print)
+                {
+                    node_name = node.get_node_name();
+                    if ((node.get_type() == node_type.ALICE) || (node.get_type() == node_type.AND))
+                    {
+                        s_node_type = "0";
+                    }
+                    else if ((node.get_type() == node_type.BOB) || (node.get_type() == node_type.OR))
+                    {
+                        s_node_type = "1";
+                    }
+                    string line = node_name + s_node_type;
+                    fs.WriteLine(line);
+                }
+            }
+        } // End of function "write_tree_to_file"
+
     }
+
+    
 }

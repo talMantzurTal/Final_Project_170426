@@ -45,6 +45,14 @@ namespace FinalProject
             m_children = new LogicNode[m_num_of_children];
         }
 
+        public override Node deep_copy() //vered!!!
+        {
+            Node tmp_node_cpy = this.deep_copy();
+            LogicNode logic_node_cpy = new LogicNode(tmp_node_cpy);
+            logic_node_cpy.m_value = this.m_value;
+            return (logic_node_cpy);
+        }
+
         public LogicNode get_child(string child_name)
         {
             for (int i = 0; i < m_num_of_children; i++)

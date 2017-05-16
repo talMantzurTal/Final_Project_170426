@@ -10,6 +10,8 @@ namespace FinalProject
     {
         private Node m_sub_formula_tree;
         private string m_input;
+        private PartyNode m_protocol_node_reference; // used for egh transformation
+        private bool m_is_zero_padding;
 
         public PartyNode()
             : base()
@@ -23,12 +25,15 @@ namespace FinalProject
             // TODO - KW function creats the party node with a suitable "root" of sub_formula_tree
             // m_sub_formula_tree = new FormulaTree(m_num_of_children,null);
             m_input = null;
+            m_protocol_node_reference = null;
+            m_is_zero_padding = false;
         }
-        public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent, Node f_tree) :
+        public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent = null, Node f_tree = null) :
             base(name, type, depth, number_of_children, parent)
         {
             Console.WriteLine("PartyNode c'tor");
             m_children = new PartyNode[m_num_of_children];
+            m_is_zero_padding = false;
             for (int i = 0; i < m_num_of_children; i++)
             {
                 m_children[i] = null;
@@ -37,6 +42,8 @@ namespace FinalProject
             // m_sub_formula_tree = new FormulaTree(m_num_of_children,null);
             m_input = null;
             m_sub_formula_tree = f_tree;
+            m_protocol_node_reference = null;
+            m_is_zero_padding = false;
         }
 
         public PartyNode(Node node)
@@ -51,9 +58,16 @@ namespace FinalProject
                 Array.Resize(ref m_children, m_num_of_children);
                 m_children[m_num_of_children - 1] = null;
             }
-            else
+            else 
             {
-                m_children = new PartyNode[m_num_of_children];
+                m_children = new PartyNode[m_num_of_children]; //in case that typeof = Node preform only this command
+                if (t == typeof(FinalProject.PartyNode)) //vered!!
+                {
+                    PartyNode tmp_node = (PartyNode)node; //vered!!!!!!!
+                    m_sub_formula_tree = tmp_node.get_sub_formula_tree_ptr(); //vered!!!
+                    m_protocol_node_reference = null; 
+                }
+               
             }
 
             if (node.get_type() == node_type.AND)
@@ -72,12 +86,43 @@ namespace FinalProject
             {
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", node.get_type().ToString());
             }
+            m_is_zero_padding = false;
+        }
+
+        public override Node deep_copy() //vered!!
+        {
+            //  Node tmp_node_cpy = base.deep_copy();
+            PartyNode party_node_cpy = new PartyNode(base.deep_copy());
+            party_node_cpy.m_sub_formula_tree = this.m_sub_formula_tree;
+            party_node_cpy.m_protocol_node_reference = this; // TAL
+            return (party_node_cpy);
         }
 
         public void set_sub_formula_tree_ptr(Node f_tree)
         {
             m_sub_formula_tree = f_tree;
 
+        }
+
+        public Node get_sub_formula_tree_ptr()
+        {
+            return (m_sub_formula_tree);
+
+        }
+
+        public PartyNode get_protocol_node_reference()
+        {
+            return m_protocol_node_reference;
+        }
+
+        public void set_is_zero_padding(bool flag = true)
+        {
+            m_is_zero_padding = flag;
+        }
+
+        public bool get_is_zero_padding()
+        {
+            return m_is_zero_padding;
         }
     }
 }
