@@ -147,33 +147,40 @@ namespace FinalProject
             // TreeUtils.write_tree_to_file(egh_tree);
             // Zero padding
             egh_tree.zero_padding(egh_desired_depth);
+
             return null;
         }
 
-        // TODO: do it as a sub-function to zero padding
         void zero_padding(int tree_depth_after_padding, int start_depth = 0)
         {
+            create_zero_sub_tree(tree_depth_after_padding, start_depth);
+        }
+        
+        void create_zero_sub_tree(int tree_depth_after_padding, int start_depth = 0)
+        {
             string name = "0";
+            int idx_for_name = 0;
             node_type type = node_type.ALICE;
             int cur_depth_child = start_depth;
             
             PartyNode cur_node_parent = new PartyNode();
-            PartyNode root_zero_tree = new PartyNode(name,type,cur_depth_child,this.m_num_of_children);
+            PartyNode root_zero_tree = new PartyNode(name,type,cur_depth_child, this.m_num_of_children);
             cur_node_parent = root_zero_tree;
 
-            while (root_zero_tree.get_last_child_idx() < (m_num_of_children + 1))
+            while ( ((cur_node_parent == root_zero_tree)&&(root_zero_tree.get_last_child_idx() < (m_num_of_children - 1))) || (cur_node_parent != root_zero_tree) )
             {
-                while ( (cur_node_parent.get_depth() < tree_depth_after_padding) && (cur_node_parent.get_last_child_idx() < m_num_of_children) )
+                while ( (cur_node_parent.get_depth() < tree_depth_after_padding) && (cur_node_parent.get_last_child_idx() < (m_num_of_children-1)) )
                 {
-                    if (cur_node_parent != root_zero_tree)
-                    {
-                        // Type
-                        if (cur_node_parent.get_type() == node_type.ALICE) type = node_type.BOB;
-                        else if (cur_node_parent.get_type() == node_type.BOB) type = node_type.ALICE;
-                        else throw new System.ArgumentException("zero_padding: Illegal type for party node", cur_node_parent.get_type().ToString());
-                        // Depth
-                        cur_depth_child = cur_node_parent.get_depth() + 1;
-                    }
+                    // Type
+                    if (cur_node_parent.get_type() == node_type.ALICE) type = node_type.BOB;
+                    else if (cur_node_parent.get_type() == node_type.BOB) type = node_type.ALICE;
+                    else throw new System.ArgumentException("zero_padding: Illegal type for party node", cur_node_parent.get_type().ToString());
+                    // Depth
+                    cur_depth_child = cur_node_parent.get_depth() + 1;
+                    // Name 
+                    idx_for_name++;
+                    name = idx_for_name.ToString();
+
                     // Create a new PartyNode
                     PartyNode child_to_add = new PartyNode(name, type, cur_depth_child, this.m_num_of_children);
 
@@ -181,10 +188,20 @@ namespace FinalProject
                     cur_node_parent.inc_last_child_idx();
                     cur_node_parent.add_child(child_to_add,cur_node_parent.get_last_child_idx());
                     cur_node_parent = child_to_add;
+                    
                 }
-                cur_node_parent = (PartyNode)cur_node_parent.get_parent();
+                if (cur_node_parent.get_parent() != null)
+                {
+                    cur_node_parent = (PartyNode)cur_node_parent.get_parent();
+                } else
+                {
+                    cur_node_parent = (PartyNode)cur_node_parent.get_child(cur_node_parent.get_last_child_idx());
+                }
             }
-        }
+            
+            ProtocolTree zero_sub_tree = new ProtocolTree(root_zero_tree.get_num_of_children(), root_zero_tree);
+            TreeUtils.write_tree_to_file(zero_sub_tree);
+        } // End of "create_zero_sub_tree"
     }
 }
 
