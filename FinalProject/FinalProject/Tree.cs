@@ -62,12 +62,12 @@ namespace FinalProject
             {
                 var n = s.Pop();
                 // if search_flag then search a node by name and return it
-                if (search_flag && (n.get_node_name().Equals(name_to_search)))
+                if (search_flag && (n.get_name().Equals(name_to_search)))
                 {
                     return n;
                 }
                 // Do Action
-                Console.Write(n.get_node_name());
+                Console.Write(n.get_name());
                 foreach (var child in n.get_children().ToArray().Reverse())
                 {
                     if (child != null)
@@ -103,7 +103,7 @@ namespace FinalProject
 
             foreach (Node node in this)
                 {
-                    name = node.get_node_name();
+                    name = node.get_name();
                     //if ( name ot.get_== m_ronode_name() ) continue;
 
                     Node[] children = node.get_children();
@@ -121,7 +121,7 @@ namespace FinalProject
 
             foreach (Node node in cloned_tree)
             {
-                Console.WriteLine(node.get_node_name());
+                Console.WriteLine(node.get_name());
             }
             return cloned_tree;
         }

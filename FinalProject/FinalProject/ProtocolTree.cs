@@ -48,7 +48,7 @@ namespace FinalProject
             // Get formula tree root, and create a protocol tree from this f_root
             Node f_root = new LogicNode();
             f_root = f_tree.get_root();
-            string root_name = f_root.get_node_name();
+            string root_name = f_root.get_name();
             node_type root_type;
             if (f_root.get_type() == node_type.AND)
             {
@@ -79,12 +79,12 @@ namespace FinalProject
                 // Do Action
                 PartyNode p_tmp_node = new PartyNode((Node)n);
                 // Find node's parent and add the node to the protocol tree
-                if (!p_tmp_node.get_node_name().Equals(f_root.get_node_name()))
+                if (!p_tmp_node.get_name().Equals(f_root.get_name()))
                 {
-                    Node parent_node = Tree.preOrder(p_root, n.get_parent().get_node_name(), true);
+                    Node parent_node = Tree.preOrder(p_root, n.get_parent().get_name(), true);
                       parent_node.set_child(p_tmp_node);
                 }
-                Console.WriteLine(n.get_node_name());
+                Console.WriteLine(n.get_name());
 
                 foreach (var child in n.get_children().ToArray().Reverse())
                 {

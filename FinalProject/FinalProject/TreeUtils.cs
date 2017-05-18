@@ -95,7 +95,7 @@ namespace FinalProject
                 string s_node_type = "";
                 foreach (Node node in tree_2_print)
                 {
-                    node_name = node.get_node_name();
+                    node_name = node.get_name();
                     if ((node.get_type() == node_type.ALICE) || (node.get_type() == node_type.AND))
                     {
                         s_node_type = "0";
@@ -112,5 +112,5 @@ namespace FinalProject
 
     }
 
-    
+
 }

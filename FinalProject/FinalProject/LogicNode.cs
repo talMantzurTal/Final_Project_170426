@@ -56,7 +56,7 @@ namespace FinalProject
         public LogicNode get_child(string child_name)
         {
             for (int i = 0; i < m_num_of_children; i++)
-                if ((m_children[i] != null) && (m_children[i].get_node_name() == child_name)) return (LogicNode)m_children[i];
+                if ((m_children[i] != null) && (m_children[i].get_name() == child_name)) return (LogicNode)m_children[i];
             return null;
         }
 

@@ -22,7 +22,7 @@ namespace FinalProject
 
         public Node()
         {
-            Console.WriteLine("Node c'tor");
+            Console.WriteLine("Node default c'tor");
             m_type = node_type.NA;
             m_depth = 0;
             m_num_of_children = 0;
@@ -31,7 +31,7 @@ namespace FinalProject
             m_children = null;
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
-            m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
+            m_last_child_idx = INVALID_VALUE; // If we visited at child[0], we increment m_last_child_idx 
 
         }
 
@@ -54,18 +54,17 @@ namespace FinalProject
             m_type = node.get_type();
             m_depth = node.get_depth();
             m_num_of_children = node.get_num_of_children();
-          //  m_parent = node.get_parent();
             m_parent = null; //vered change
-            m_name = node.get_node_name();
+            m_name = node.get_name();
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
             m_children = null;
-            // m_children = node.get_children();
         }
 
 
-        public string get_node_name()
+        // GETTERS
+        public string get_name()
         {
             return m_name;
         }
@@ -77,121 +76,14 @@ namespace FinalProject
             return null;
         } */
 
-        public void set_parent(Node parent)
-        {
-            this.m_parent = parent;
-        }
-
-        public void add_child(Node new_child, int child_to_add_idx = -1, copy_flags flag = copy_flags.SHALLOW)
-        {
-            // Find the first empty child which hasn't been assigned 
-            int child_idx = 0;
-            if (child_to_add_idx == INVALID_VALUE)
-            {
-                while ((child_idx < m_num_of_children) && (m_children[child_idx] != null))
-                {
-                    child_idx++;
-                }
-            }
-            else child_idx = child_to_add_idx;
-
-            // Change m_if_leaf to false.
-            m_if_leaf = false;
-
-            // If flag = shallow copy, the new child is the pointer that accepted 
-            // "new_child", including it's subtree if exist.
-            // -----------------------------------------------------------------------
-            if (flag == copy_flags.SHALLOW)
-            {
-                this.m_children[child_idx] = new_child;
-                new_child.set_parent(this);
-                // Set child's depth
-                m_children[child_idx].m_depth = this.m_depth + 1;
-                return;
-            }
-            // If flag = deep copy, create a new tmp_node and add this node as a child
-            // without it's subtree
-            // -----------------------------------------------------------------------
-            // Create a tmp_node to add as a child
-            string name = new_child.get_node_name();
-            node_type type = new_child.get_type();
-            int depth = new_child.get_depth();
-            int num_of_children = new_child.get_num_of_children();
-            Node parent = new_child.get_parent();
-            Node tmp_node = new Node(name, type, depth, num_of_children, parent);
-
-
-            // Set tmp_node.if_leaf = true
-            tmp_node.m_if_leaf = true;
-
-            if (child_idx == m_num_of_children)
-            {
-                throw new System.ArgumentException("Can't add another child, there are already {0} children to this node", child_idx.ToString());
-            }
-            // Add tmp_node as a child
-            m_children[child_idx] = tmp_node;
-            m_children[child_idx].m_depth = this.m_depth + 1;
-            return;
-        }
-
-
-
-        public bool set_child(Node child_to_add, copy_flags flag = copy_flags.SHALLOW)
-        {
-
-            int i = 0;
-            if (m_children == null) {
-                m_children = new Node[m_num_of_children];
-                for (int child_idx = 0; child_idx < m_num_of_children; child_idx++)
-                    m_children[child_idx] = null;
-            }
-
-            // Change m_if_leaf to false.
-            m_if_leaf = false;
-
-            // Find the first empty child which hasn't been assigned 
-            while ((i < m_num_of_children) && (m_children[i] != null)) i++;
-            if (i == m_num_of_children) return false;
-            else
-            {
-                Type t = this.GetType();
-                if (t.Equals(typeof(LogicNode)))
-                    m_children[i] = new LogicNode(child_to_add);
-                      
-                else m_children[i] = new PartyNode(child_to_add);
-                
-                m_children[i].m_parent = this; /////// vered change
-            }
-
-            // Set children depth
-            m_children[i].m_depth = this.m_depth + 1;
-            if (m_children[i].m_if_leaf) return true;
-            Tree tmp_tree_for_depth = new Tree(m_children[i]);
-            foreach (Node node in tmp_tree_for_depth)
-            {
-                node.m_depth = node.get_parent().get_depth() + 1;
-            }
-            return true;
-        }
-
         public int get_last_child_idx()
         {
             return m_last_child_idx;
         }
 
-        public void inc_last_child_idx()
-        {
-            m_last_child_idx++;
-        }
-
         public Node get_child(int last_child_idx)
         {
             return m_children[last_child_idx];
-        }
-
-        public void set_leaf_idx(int leaf_idx)
-        {
-            m_leaf_idx = leaf_idx;
         }
 
         public Node get_parent(copy_flags flag = copy_flags.SHALLOW)
@@ -203,7 +95,6 @@ namespace FinalProject
         {
             return m_depth;
         }
-
 
         public node_type get_type()
         {
@@ -232,28 +123,6 @@ namespace FinalProject
             return children_to_return;
         }
 
-        /* Deep copy a node without pointers to it's parent and children */
-        public virtual Node deep_copy()
-        {
-            string name = m_name;
-            node_type type = m_type;
-            int depth = m_depth;
-            int number_of_children = m_num_of_children;
-            bool if_leaf = m_if_leaf;
-            int leaf_idx = m_leaf_idx;
-
-            Node tmp_node = new Node(name, type, depth, number_of_children, /* parent = */null);
-            tmp_node.set_leaf_idx(leaf_idx);
-            tmp_node.set_if_leaf(if_leaf);
-
-            return tmp_node;
-        }
-
-        public virtual int calculate_value(int[] input_vector)
-        {
-            return 0;
-        }
-
         public bool get_if_leaf()
         {
             return m_if_leaf;
@@ -264,13 +133,182 @@ namespace FinalProject
             return m_leaf_idx;
         }
 
+        // SETTERS
+        public void set_parent(Node parent)
+        {
+            this.m_parent = parent;
+        }
+
+        public void set_leaf_idx(int leaf_idx)
+        {
+            m_leaf_idx = leaf_idx;
+        }
+
         public void set_if_leaf(bool if_leaf)
         {
             m_if_leaf = if_leaf;
         }
 
-        
+        // METHODS
+        // --------
 
+        /* Node::add_child()
+         * The method add a child to a specific node int the first position that empty in node.m_children or in the
+         * index that was sent to the method. The defauld addition is shallow, but it can be added in a deep way after 
+         * creating new child.
+         * [INPUT]:
+         * new_child =        a Node type child, that we want to add to the current node
+         * child_to_add_idx = The index we desired to assign the child to in the m_children array. 
+         *                    If it isn't set, the method looks to the first empty cell to assign into
+         * flag =             The flag indicates of how to add the child: as a pointer (shallow - the default) or to create a new Node (deep)
+         * 
+         * [OUTPUT]:
+         * void
+         * ********************************************************************************************************************************** */
+        public void add_child(Node new_child, int child_to_add_idx = INVALID_VALUE, copy_flags flag = copy_flags.SHALLOW)
+        {
+            // Find the first empty child which hasn't been assigned 
+            int child_idx = 0;
+            if (child_to_add_idx == INVALID_VALUE)
+            {
+                while ((child_idx < m_num_of_children) && (m_children[child_idx] != null))
+                {
+                    child_idx++;
+                }
+            }
+            else child_idx = child_to_add_idx;
+
+            // Change m_if_leaf to false, because this method add a child to it and therefor it became an internal node
+            m_if_leaf = false;
+
+            // SHALLOW COPY if required (default)
+            // If flag = shallow copy, the new child is the pointer that accepted 
+            // "new_child", including it's subtree if exist.
+            // -----------------------------------------------------------------------
+            if (flag == copy_flags.SHALLOW)
+            {
+                this.m_children[child_idx] = new_child;
+                new_child.set_parent(this);
+                // Set child's depth
+                m_children[child_idx].m_depth = this.m_depth + 1;
+                return;
+            }
+
+            // DEEP COPY if required
+            // If flag = deep copy, create a new tmp_node and add this node as a child
+            // without it's subtree
+            // -----------------------------------------------------------------------
+            // Create a tmp_node to add as a child
+            string name = new_child.get_name();
+            node_type type = new_child.get_type();
+            int depth = new_child.get_depth();
+            int num_of_children = new_child.get_num_of_children();
+            Node parent = new_child.get_parent();
+            Node child_to_add = new Node(name, type, depth, num_of_children, parent);
+
+
+            // Set tmp_node.if_leaf = true
+            child_to_add.m_if_leaf = true;
+
+            if (child_idx == m_num_of_children)
+            {
+                throw new System.ArgumentException("Can't add another child, there are already {0} children to this node", child_idx.ToString());
+            }
+            // Add tmp_node as a child
+            m_children[child_idx] = child_to_add;
+            m_children[child_idx].m_depth = this.m_depth + 1;
+            return;
+        }
+
+        // TODO: merge add_child and set_child
+        public bool set_child(Node child_to_add, copy_flags flag = copy_flags.SHALLOW)
+        {
+
+            int i = 0;
+            if (m_children == null)
+            {
+                m_children = new Node[m_num_of_children];
+                for (int child_idx = 0; child_idx < m_num_of_children; child_idx++)
+                    m_children[child_idx] = null;
+            }
+
+            // Change m_if_leaf to false.
+            m_if_leaf = false;
+
+            // Find the first empty child which hasn't been assigned 
+            while ((i < m_num_of_children) && (m_children[i] != null)) i++;
+            if (i == m_num_of_children) return false;
+            else
+            {
+                Type t = this.GetType();
+                if (t.Equals(typeof(LogicNode)))
+                    m_children[i] = new LogicNode(child_to_add);
+
+                else m_children[i] = new PartyNode(child_to_add);
+
+                m_children[i].m_parent = this; /////// vered change
+            }
+
+            // Set children depth
+            m_children[i].m_depth = this.m_depth + 1;
+            if (m_children[i].m_if_leaf) return true;
+            Tree tmp_tree_for_depth = new Tree(m_children[i]);
+            foreach (Node node in tmp_tree_for_depth)
+            {
+                node.m_depth = node.get_parent().get_depth() + 1;
+            }
+            return true;
+        }
+
+        /* Node::inc_last_child_idx()
+         * The method increments the data member m_last_child_idx
+         * [INPUT]:
+         * void
+         * [OUTPUT]:
+         * void
+         * ******************************************************** */
+        public void inc_last_child_idx()
+        {
+            m_last_child_idx++;
+        }
+
+
+        /* Node::deep_copy()
+         * The virtual method doing a deep copy a node without pointers to it's parent and children 
+         * [INPUT]:
+         * void
+         * [OUTPUT]:
+         * A deep copy to this (copied_node)
+         * ***************************************************************************************** */
+        public virtual Node deep_copy()
+        {
+            string name = m_name;
+            node_type type = m_type;
+            int depth = m_depth;
+            int number_of_children = m_num_of_children;
+            bool if_leaf = m_if_leaf;
+            int leaf_idx = m_leaf_idx;
+
+            Node copied_node = new Node(name, type, depth, number_of_children, /* parent = */null);
+            copied_node.set_leaf_idx(leaf_idx);
+            copied_node.set_if_leaf(if_leaf);
+
+            return copied_node;
+        }
+
+        // TAL
+        // TODO: implementation
+        /* Node::calculate_value()
+         * The method calculate the value of a specific node using it's sub formula tree (it's children)
+         * [INPUT]: 
+         * input_vector = an array of integers represents the input value to it's sub formula tree
+         * [OUTPUT]:
+         * An integer stores the calculated value for this
+         * ******************************************************************************************** */
+        public virtual int calculate_value(int[] input_vector)
+        {
+            return 0;
+        }
 
 
     }

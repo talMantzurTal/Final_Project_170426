@@ -17,8 +17,13 @@ namespace FinalProject
         {
             Console.WriteLine("FormulaTree defualt c'tor");
             m_num_of_variables = 0;
+            m_root = null;
+            m_depth = 0;
+            m_num_of_children = 0;
         }
 
+        // TAL: public FormulaTree(int num_of_children, LogicNode root_node) :
+        // Takes num_of_children from the node that was sent and not as an input
         public FormulaTree(LogicNode root_node) :
             base((Node)root_node)
         {
@@ -26,8 +31,15 @@ namespace FinalProject
             m_num_of_variables = 0;
             m_root = root_node;
             m_depth = 0;
+            m_num_of_children = root_node.get_num_of_children();
         }
 
+        /* FormulaTree::add_child()
+         * The method adds a child from type LogicNode to  specific LogicNode in the tree (shallow copy)
+         * IN: name = name of the new LogicNode
+         * IN: type = type of the new LogicNode: AND or OR (from enum node_type)
+         * OUT: void
+         * ********************************************************************************************** */
         public void add_child(string name, node_type type, LogicNode parent)
         {
             int new_node_depth = parent.get_depth() + 1;
@@ -37,11 +49,22 @@ namespace FinalProject
             if (new_node_depth > m_depth) m_depth = new_node_depth;
         }
 
-        public void calculate_formula(string input)
+        // TAL
+        // TODO: implementation
+        /* FormulaTree::calculate_formula()
+         * The method calculate the formula implemented as a FormulaTree with the input to the formula
+         * IN: formula_input = the input to the formula that should be calculated
+         * ******************************************************************************************** */
+        public void calculate_formula(string formula_input)
         {
             return;
         }
 
+        /* FormulaTree::number_leaves()
+         * The method number the leaves in the formula tree (using enumerator implementation)
+         * IN: void
+         * OUT: void
+         * ********************************************************************************** */
         public void number_leaves()
         {
             int leaf_count = 0;
@@ -65,7 +88,7 @@ namespace FinalProject
             int leaf_idx = 0;
             int curr_last_child_idx = curr_node.get_last_child_idx();
             // Number the leaves while the parent isn't the root or it is the root but the program haven't checked all root's children yet
-            while ((curr_node.get_node_name() != m_root.get_node_name()) || ((curr_last_child_idx + 1) < m_num_of_children))
+            while ((curr_node.get_name() != m_root.get_name()) || ((curr_last_child_idx + 1) < m_num_of_children))
             {
                 curr_node.inc_last_child_idx();
                 curr_last_child_idx = curr_node.get_last_child_idx();
@@ -95,7 +118,7 @@ namespace FinalProject
                         tmp_last_child_idx = tmp_head.get_last_child_idx();
                     }
                 }
-                Console.WriteLine("node ({0})", curr_node.get_node_name());
+                Console.WriteLine("node ({0})", curr_node.get_name());
                 curr_node = tmp_head.get_parent();
             }
             m_num_of_variables = leaf_idx;
@@ -105,7 +128,7 @@ namespace FinalProject
         public Tree deep_copy() //vered!!!
         {
             /* perform deep copy of the root and use this copy in order to create a sub FormulaTree */
-            Node cloned_root = m_root.deep_copy(); 
+            Node cloned_root = m_root.deep_copy();
             LogicNode cloned_formula_root = new LogicNode(cloned_root);
             FormulaTree cloned_formula_tree = new FormulaTree(cloned_formula_root);
             return (this.deep_copy(/*cloned_formula_root,*/cloned_formula_tree));
@@ -117,7 +140,7 @@ namespace FinalProject
             int leaf_idx = 0;
             int curr_last_child_idx = curr_node.get_last_child_idx();
             // Number the leaves while the parent isn't the root or it is the root but the program haven't checked all root's children yet
-            while ((curr_node.get_node_name() != m_root.get_node_name()) || ((curr_last_child_idx + 1) < m_num_of_children))
+            while ((curr_node.get_name() != m_root.get_name()) || ((curr_last_child_idx + 1) < m_num_of_children))
             {
                 curr_node.inc_last_child_idx();
                 curr_last_child_idx = curr_node.get_last_child_idx();
