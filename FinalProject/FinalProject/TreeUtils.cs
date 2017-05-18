@@ -15,8 +15,8 @@ namespace FinalProject
     class TreeUtils
     {
 #if XCV
-        const string FILE_NAME_IN = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_input.txt";
-        const string FILE_NAME_OUT = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_output.txt";
+        const string FILE_NAME_IN = @"C:\Users\vered\Documents\GitHub\Final_Project_170426\tree_input.txt";
+        const string FILE_NAME_OUT = @"C:\Users\vered\Documents\GitHub\Final_Project_170426\tree_output.txt";
 #endif
 
         public static FormulaTree read_tree_from_file()

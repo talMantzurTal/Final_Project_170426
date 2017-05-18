@@ -23,12 +23,12 @@ namespace FinalProject
             m_num_of_children = 0;
         }
 
-        public Tree(int num_of_children, Node root_node)
+        public Tree(Node root_node)
         {
             Console.WriteLine("Tree c'tor");
             m_root = root_node;
             m_depth = 0;
-            m_num_of_children = num_of_children;
+            m_num_of_children = root_node.get_num_of_children();
         }
 
         public Tree(Tree tree)
@@ -139,7 +139,7 @@ namespace FinalProject
                 if ((node.get_if_leaf()) && (max_depth < node.get_depth()))
                     max_depth = node.get_depth();
             }
-            m_depth = max_depth + 1; // TODO: ask Ran Gelles about the depth
+            m_depth = max_depth ; // according number of edges
 
         }
     }

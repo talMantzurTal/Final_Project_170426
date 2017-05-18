@@ -17,19 +17,15 @@ namespace FinalProject
         {
             Console.WriteLine("FormulaTree defualt c'tor");
             m_num_of_variables = 0;
-            m_root = null;
-            m_depth = 0;
-            m_num_of_children = 0;
         }
 
-        public FormulaTree(int num_of_children, LogicNode root_node) :
-            base(num_of_children, (Node)root_node)
+        public FormulaTree(LogicNode root_node) :
+            base((Node)root_node)
         {
             Console.WriteLine("FormulaTree c'tor");
             m_num_of_variables = 0;
             m_root = root_node;
             m_depth = 0;
-            m_num_of_children = num_of_children;
         }
 
         public void add_child(string name, node_type type, LogicNode parent)
@@ -111,7 +107,7 @@ namespace FinalProject
             /* perform deep copy of the root and use this copy in order to create a sub FormulaTree */
             Node cloned_root = m_root.deep_copy(); 
             LogicNode cloned_formula_root = new LogicNode(cloned_root);
-            FormulaTree cloned_formula_tree = new FormulaTree(m_num_of_children, cloned_formula_root);
+            FormulaTree cloned_formula_tree = new FormulaTree(cloned_formula_root);
             return (this.deep_copy(/*cloned_formula_root,*/cloned_formula_tree));
         }
 

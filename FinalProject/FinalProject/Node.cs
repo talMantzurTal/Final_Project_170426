@@ -166,7 +166,7 @@ namespace FinalProject
             // Set children depth
             m_children[i].m_depth = this.m_depth + 1;
             if (m_children[i].m_if_leaf) return true;
-            Tree tmp_tree_for_depth = new Tree(m_num_of_children,m_children[i]);
+            Tree tmp_tree_for_depth = new Tree(m_children[i]);
             foreach (Node node in tmp_tree_for_depth)
             {
                 node.m_depth = node.get_parent().get_depth() + 1;
