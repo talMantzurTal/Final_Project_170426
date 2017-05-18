@@ -15,8 +15,8 @@ namespace FinalProject
     class TreeUtils
     {
 #if XCV
-        const string FILE_NAME_IN = @"C:\Users\vered\Documents\GitHub\Final_Project_170426\tree_input.txt";
-        const string FILE_NAME_OUT = @"C:\Users\vered\Documents\GitHub\Final_Project_170426\tree_output.txt";
+        const string FILE_NAME_IN = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_input.txt";
+        const string FILE_NAME_OUT = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\tree_output.txt";
 #endif
 
         public static FormulaTree read_tree_from_file()
@@ -81,7 +81,7 @@ namespace FinalProject
                 fs.Close();
                 formula_tree.number_leaves();
             } // If file exists
-            else throw new System.ArgumentException("read_tree_from_file: Text file {0} doesn't exist\n", FILE_NAME_IN);
+            else Console.WriteLine("Text file doesn't exist");
             return formula_tree;
         } // End of function "read_tree_from_file"
 
@@ -112,5 +112,5 @@ namespace FinalProject
 
     }
 
-
+    
 }
