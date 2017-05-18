@@ -81,7 +81,7 @@ namespace FinalProject
                 fs.Close();
                 formula_tree.number_leaves();
             } // If file exists
-            else Console.WriteLine("Text file doesn't exist");
+            else throw new System.ArgumentException("read_tree_from_file: Text file {0} doesn't exist\n", FILE_NAME_IN);
             return formula_tree;
         } // End of function "read_tree_from_file"
 

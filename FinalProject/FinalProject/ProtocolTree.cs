@@ -82,7 +82,7 @@ namespace FinalProject
                 if (!p_tmp_node.get_name().Equals(f_root.get_name()))
                 {
                     Node parent_node = Tree.preOrder(p_root, n.get_parent().get_name(), true);
-                      parent_node.set_child(p_tmp_node);
+                      parent_node.add_child(p_tmp_node);
                 }
                 Console.WriteLine(n.get_name());
 
@@ -154,6 +154,7 @@ namespace FinalProject
                     if (sub_tree_to_copy.get_depth() + egh_node.get_depth() < egh_desired_depth)
                     {
                         ProtocolTree cloned_sub_tree = new ProtocolTree(sub_tree_to_copy.deep_copy());
+                        //egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
                         egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
                     }
                 }
@@ -188,19 +189,23 @@ namespace FinalProject
                 {
                    if ((node.get_depth() < tree_depth_after_padding) && (node.get_child(child_idx) == null))
                    {
-                       zero_sub_tree =(ProtocolTree) create_zero_sub_tree(tree_depth_after_padding, node.get_depth() + 1 );
-                       node.add_child(zero_sub_tree.get_root());
-                   }
+                       zero_sub_tree =(ProtocolTree) create_zero_sub_tree(tree_depth_after_padding, node.get_type(), node.get_depth() + 1 );
+                        //node.add_child(zero_sub_tree.get_root());
+                        node.add_child(zero_sub_tree.get_root());
+                    }
                 }               
             }
             TreeUtils.write_tree_to_file(this);
         }
         
-        Tree create_zero_sub_tree(int tree_depth_after_padding, int start_depth = 0)
+        Tree create_zero_sub_tree(int tree_depth_after_padding, node_type type_parent = node_type.BOB ,int start_depth = 0)
         {
             string name = "0";
             int idx_for_name = 0;
-            node_type type = node_type.ALICE;
+            node_type type;
+            if ( type_parent == node_type.ALICE ) type= node_type.BOB;
+            else if (type_parent == node_type.BOB) type = node_type.ALICE;
+            else throw new System.ArgumentException("create_zero_sub_tree1: Illegal type for party node", type_parent.ToString());
             int cur_depth_child = start_depth;
             
             PartyNode cur_node_parent = new PartyNode();
@@ -216,7 +221,7 @@ namespace FinalProject
                         // Type
                         if (cur_node_parent.get_type() == node_type.ALICE) type = node_type.BOB;
                         else if (cur_node_parent.get_type() == node_type.BOB) type = node_type.ALICE;
-                        else throw new System.ArgumentException("zero_padding: Illegal type for party node", cur_node_parent.get_type().ToString());
+                        else throw new System.ArgumentException("create_zero_sub_tree2: Illegal type for party node", cur_node_parent.get_type().ToString());
                         // Depth
                         cur_depth_child = cur_node_parent.get_depth() + 1;
                         // Name 
@@ -228,7 +233,9 @@ namespace FinalProject
 
                         child_to_add.set_is_zero_padding(true);
                         cur_node_parent.inc_last_child_idx();
+                        //cur_node_parent.add_child(child_to_add, cur_node_parent.get_last_child_idx());
                         cur_node_parent.add_child(child_to_add, cur_node_parent.get_last_child_idx());
+                        //child_to_add.set_parent(cur_node_parent);
                         cur_node_parent = child_to_add;
 
                     }
@@ -243,7 +250,7 @@ namespace FinalProject
                 }
             }
             ProtocolTree zero_sub_tree = new ProtocolTree(root_zero_tree);
-            TreeUtils.write_tree_to_file(zero_sub_tree);
+            //TreeUtils.write_tree_to_file(zero_sub_tree);
             return zero_sub_tree;
         } // End of "create_zero_sub_tree"
     }
