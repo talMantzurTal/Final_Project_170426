@@ -49,7 +49,7 @@ namespace FinalProject
         public PartyNode(Node node)
             : base(node)
         {
-           // m_sub_formula_tree = node;
+            // m_sub_formula_tree = node;
             Type t = node.GetType();
             if (t == typeof(FinalProject.LogicNode))
             {
@@ -58,16 +58,16 @@ namespace FinalProject
                 Array.Resize(ref m_children, m_num_of_children);
                 m_children[m_num_of_children - 1] = null;
             }
-            else 
+            else
             {
                 m_children = new PartyNode[m_num_of_children]; //in case that typeof = Node preform only this command
                 if (t == typeof(FinalProject.PartyNode)) //vered!!
                 {
                     PartyNode tmp_node = (PartyNode)node; //vered!!!!!!!
                     m_sub_formula_tree = tmp_node.get_sub_formula_tree_ptr(); //vered!!!
-                    m_protocol_node_reference = null; 
+                    m_protocol_node_reference = null;
                 }
-               
+
             }
 
             if (node.get_type() == node_type.AND)
