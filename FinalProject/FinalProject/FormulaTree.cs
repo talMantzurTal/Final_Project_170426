@@ -44,7 +44,7 @@ namespace FinalProject
         {
             int new_node_depth = parent.get_depth() + 1;
             Node node_to_add = new LogicNode(name, type, new_node_depth, m_num_of_children, parent);
-            bool result = parent.set_child((Node)node_to_add);
+            bool result = parent.add_child((Node)node_to_add);
             // The tree depth is the longest path in the tree
             if (new_node_depth > m_depth) m_depth = new_node_depth;
         }

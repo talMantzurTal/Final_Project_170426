@@ -113,7 +113,7 @@ namespace FinalProject
                         if (child == null) continue;
                         Node tmp_child_node = child.deep_copy();
         
-                        clone_curr_node.set_child(tmp_child_node);
+                        clone_curr_node.add_child(tmp_child_node);
                     }
 
                 }
