@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Numerics;
 
 namespace FinalProject
 {
@@ -98,7 +100,7 @@ namespace FinalProject
             return (party_node_cpy);
         }
     
-        // TAL
+
         public void set_sub_formula_tree_ptr(Node f_tree)
         {
             m_sub_formula_tree = f_tree;
@@ -125,5 +127,40 @@ namespace FinalProject
         {
             return m_is_zero_padding;
         }
+
+        public List<int[]> generate_error_vectors(Node node)
+        {
+            PartyNode parent = (PartyNode)this.get_parent();
+            PartyNode cur_node = (PartyNode)node;
+            int[] generic_error_array = new int[node.get_depth()];
+
+            int my_idx_as_a_child = INVALID_VALUE;
+            int ERROR = m_num_of_children - 1; // The index of the error child. Used to generate a generic error vector.
+            int node_depth = node.get_depth();
+            int num_of_errors = 0;
+
+            // iterate over all nodes in path from node to root
+            for (int cur_node_depth = node_depth; cur_node_depth>0; cur_node_depth--)
+            {
+                my_idx_as_a_child = cur_node.my_idx_as_a_child();
+
+                // Store a generic value for the error vactor: error/no error
+                if (my_idx_as_a_child != ERROR)
+                    generic_error_array[cur_node_depth] = Globals.NO_ERROR;
+                else
+                {
+                    generic_error_array[cur_node_depth] = ERROR;
+                    num_of_errors++;
+                }
+            }
+
+            // Generate vector
+
+            return null;
+        }
+
+
+
+
     }
 }

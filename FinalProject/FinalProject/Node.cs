@@ -133,6 +133,7 @@ namespace FinalProject
             return m_leaf_idx;
         }
 
+
         // SETTERS
         public void set_parent(Node parent)
         {
@@ -339,6 +340,21 @@ namespace FinalProject
         public virtual int calculate_value(int[] input_vector)
         {
             return 0;
+        }
+
+        public int my_idx_as_a_child()
+        {
+            Node[] parent_children = this.get_parent().get_children();
+            int number_of_children = get_parent().get_num_of_children();
+
+            for (int i = 0; i < number_of_children; i++ )
+            {
+                if (parent_children[i] == this)
+                {
+                    return i;
+                }
+            }
+            return INVALID_VALUE;
         }
 
 

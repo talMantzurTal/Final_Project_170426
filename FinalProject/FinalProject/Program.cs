@@ -41,5 +41,6 @@ namespace FinalProject
     {
         public const double eps = 1 / 6.0;
         public const double egh_immune = 1 / 3.0;
+        public const int NO_ERROR = -2; // used for generate error vectors in PartyNode
     }
 }
