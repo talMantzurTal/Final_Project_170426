@@ -41,7 +41,12 @@ namespace FinalProject
          * f_tree = Formula tree - a boolean formula which contains AND,OR gates implemented as a binarey tree.
          * [OUTPUT]:
          * p_tree = Protocol tree - an implementation of communication protocol contains two parties: Alice and Bob
-         * [Algoritm]:     
+         * [Algoritm]: Iterate on given formula tree and for each Logic node, create a corresponding party node and 
+         * add it to KW tree (a new protocol tree).
+         * For each logic node in formula tree perform: if the type is an AND gate, create a corresponding party node with
+         * type ALICE, else(OR gate) create one with type BOB.
+         * assign a pointer from each party node to its corresponding formula node (in order to calculate the logic node
+         * value given an input [x,y]).
          ************************************************************************************************************/
         public static ProtocolTree kw_trans(FormulaTree f_tree)
         {

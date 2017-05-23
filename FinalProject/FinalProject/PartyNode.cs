@@ -97,7 +97,8 @@ namespace FinalProject
             party_node_cpy.m_protocol_node_reference = this; // TAL
             return (party_node_cpy);
         }
-
+    
+        // TAL
         public void set_sub_formula_tree_ptr(Node f_tree)
         {
             m_sub_formula_tree = f_tree;
