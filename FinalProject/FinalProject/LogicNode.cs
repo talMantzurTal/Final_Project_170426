@@ -9,10 +9,10 @@ namespace FinalProject
 {
     class LogicNode : Node
     {
-
-        // protected int m_literal_idx;
+        // DATA MEMBERS
         protected int m_value;
 
+        // C'TORS
         public LogicNode()
             : base()
         {
@@ -25,6 +25,7 @@ namespace FinalProject
             //m_literal_idx = 0;
             m_value = INVALID_VALUE;
         }
+
         public LogicNode(string name, node_type type, int depth, int number_of_children, LogicNode parent) :
             base(name, type, depth, number_of_children, parent)
         {
@@ -45,21 +46,51 @@ namespace FinalProject
             m_children = new LogicNode[m_num_of_children];
         }
 
-        public override Node deep_copy() //vered!!!
+        // GETTERS
+
+
+        // SETTERS
+
+
+        // METHODS
+
+        /* LogicNode::deep_copy()
+         * The method deep copying the LogicNode this and it's overrides the method in Node.
+         * [INPUT]:
+         * void
+         * [OUTPUT]:
+         * A deep copy to this
+         * ********************************************************************************** */
+        public override Node deep_copy()
         {
             Node tmp_node_cpy = this.deep_copy();
             LogicNode logic_node_cpy = new LogicNode(tmp_node_cpy);
             logic_node_cpy.m_value = this.m_value;
             return (logic_node_cpy);
-        }
+        } // End of method "deep_copy"
 
+        /* LogicNode::get_child()
+         * The method gets a child name, search it in the m_children array and returns it.
+         * [INPUT]:
+         * child_name = A string. A child name to search.
+         * [OUTPUT]:
+         * A pointer to the child node if the child exists in m_children, null otherwise.
+         * ******************************************************************************** */
         public LogicNode get_child(string child_name)
         {
             for (int i = 0; i < m_num_of_children; i++)
                 if ((m_children[i] != null) && (m_children[i].get_name() == child_name)) return (LogicNode)m_children[i];
             return null;
-        }
+        } // End of method "get_child"
 
+        /* LogicNode::calculate_value()
+         * The method gets an input vector and calculate the value of the boolean function the formula tree describes.
+         * [INPUT]:
+         * input_vector = An array of int. The array stores the inputs to the boolean formula the formula_tree describes.
+         *                The vector has been used for the calculation of the formula's output.
+         * [OUTPUT]:
+         * An int value stores the output value of the formula.
+         * ************************************************************************************************************ */
         public override int calculate_value(int[] input_vector)
         {
             // A recursive function
@@ -83,16 +114,9 @@ namespace FinalProject
             }
 
             return m_value;
-        }
+        } // End of method "calculate_value"
 
-        // Indexers
-        /* public LogicNode this [int idx]
-         {
-             get
-             {
-                 return; 
-              }
-         }*/
+
 
 
 

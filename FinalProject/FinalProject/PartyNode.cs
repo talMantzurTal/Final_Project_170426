@@ -14,7 +14,10 @@ namespace FinalProject
         private string m_input;
         private PartyNode m_protocol_node_reference; // used for egh transformation
         private bool m_is_zero_padding;
+        public List<int[]> error_vectors_list;
+        public static int idx_list = 0;
 
+        // C'TOR
         public PartyNode()
             : base()
         {
@@ -29,7 +32,9 @@ namespace FinalProject
             m_input = null;
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
+            error_vectors_list = new List<int[]>();
         }
+
         public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent = null, Node f_tree = null) :
             base(name, type, depth, number_of_children, parent)
         {
@@ -46,6 +51,7 @@ namespace FinalProject
             m_sub_formula_tree = f_tree;
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
+            error_vectors_list = new List<int[]>();
         }
 
         public PartyNode(Node node)
@@ -68,6 +74,7 @@ namespace FinalProject
                     PartyNode tmp_node = (PartyNode)node; //vered!!!!!!!
                     m_sub_formula_tree = tmp_node.get_sub_formula_tree_ptr(); //vered!!!
                     m_protocol_node_reference = null;
+                   error_vectors_list = new List<int[]>();
                 }
 
             }
@@ -91,26 +98,10 @@ namespace FinalProject
             m_is_zero_padding = false;
         }
 
-        public override Node deep_copy() //vered!!
-        {
-            //  Node tmp_node_cpy = base.deep_copy();
-            PartyNode party_node_cpy = new PartyNode(base.deep_copy());
-            party_node_cpy.m_sub_formula_tree = this.m_sub_formula_tree;
-            party_node_cpy.m_protocol_node_reference = this; // TAL
-            return (party_node_cpy);
-        }
-    
-
-        public void set_sub_formula_tree_ptr(Node f_tree)
-        {
-            m_sub_formula_tree = f_tree;
-
-        }
-
+        // GETTERS
         public Node get_sub_formula_tree_ptr()
         {
             return (m_sub_formula_tree);
-
         }
 
         public PartyNode get_protocol_node_reference()
@@ -118,16 +109,49 @@ namespace FinalProject
             return m_protocol_node_reference;
         }
 
-        public void set_is_zero_padding(bool flag = true)
-        {
-            m_is_zero_padding = flag;
-        }
-
         public bool get_is_zero_padding()
         {
             return m_is_zero_padding;
         }
 
+
+        // SETTERS
+        /* Node::set_sub_formula_tree_ptr()
+         * The method sets a pointer to the matching sub-formula of this
+         * [INPUT]:
+         * f_tree = a pointer to the root of a sub-formula tree
+         * [OUTPUT]:
+         * void
+         * ******************************************************** */
+        public void set_sub_formula_tree_ptr(Node f_tree)
+        {
+            m_sub_formula_tree = f_tree;
+        }
+
+        public void set_is_zero_padding(bool flag = true)
+        {
+            m_is_zero_padding = flag;
+        }
+
+        // METHODS 
+
+        /* PartyNode::deep_copy()
+         * The method deep copying the PartyNode this and it's overrides the method in Node
+         * [INPUT]:
+         * void
+         * [OUTPUT]:
+         * A deep copy to this
+         * ******************************************************** */
+        public override Node deep_copy() 
+        {
+            PartyNode party_node_cpy = new PartyNode(base.deep_copy());
+            party_node_cpy.m_sub_formula_tree = this.m_sub_formula_tree;
+            party_node_cpy.m_protocol_node_reference = this; // TAL
+            return (party_node_cpy);
+        }
+
+
+#if change
         public List<int[]> generate_error_vectors(Node node)
         {
             PartyNode parent = (PartyNode)this.get_parent();
@@ -155,11 +179,51 @@ namespace FinalProject
             }
 
             // Generate vector
+            
+            int[] error_vector_to_generate = new int[num_of_errors];
+            //List<int[]> error_vectors_list = new List<int[]>();
+            int num_of_error_vectors = (int)Math.Pow(m_num_of_children + 1, node.get_depth());
+            int error_vector_length = node.get_depth();
+            int[][] error_vectors_list = new int[num_of_error_vectors][];
+            for (int i = 0; i < num_of_error_vectors; i++)
+                error_vectors_list[i] = new int[error_vector_length];
+            generate_alphabeth_vectors(error_vector_to_generate, 0, num_of_errors, error_vectors_list);
 
             return null;
         }
 
-
+#endif
+        /* PartyNode::generate_alphabeth_vectors()
+         * The recursive method generates all vectors with a d-ary alphabeth in size of a specific size. 
+         * The vectors store in a data member of type List<int[]> 
+         * 
+         * [INPUT]:
+         * error_vector     = The generated vector in each point
+         * last_cell_in     = The last cell the function filled in the error_vector
+         * vector_size      = depth of a PartyNode in the EGH tree
+         * 
+         * [OUTPUT]:
+         * void
+         * ******************************************************************************************************************* */
+        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size)
+        {
+            int alphabeth_size = m_num_of_children + 1;
+            
+            // Stop condition
+            if ( last_cell_in == (vector_size) )
+            {
+                int[] tmp_vector = (int[])error_vector.Clone();
+                error_vectors_list.Add(tmp_vector);
+                return;
+            }
+            
+            for (int i = 0; i < alphabeth_size; i++)
+            {
+                error_vector[last_cell_in] = i;
+                generate_alphabeth_vectors(error_vector, last_cell_in+1, vector_size);
+                
+            }
+        } // End of "generate_alphabeth_vectors"
 
 
     }

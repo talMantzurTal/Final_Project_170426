@@ -304,7 +304,6 @@ namespace FinalProject
             m_last_child_idx++;
         }
 
-
         /* Node::deep_copy()
          * The virtual method doing a deep copy a node without pointers to it's parent and children 
          * [INPUT]:
@@ -326,7 +325,7 @@ namespace FinalProject
             copied_node.set_if_leaf(if_leaf);
 
             return copied_node;
-        }
+        } // End of method "deep_copy"
 
         // TAL
         // TODO: implementation
@@ -340,8 +339,15 @@ namespace FinalProject
         public virtual int calculate_value(int[] input_vector)
         {
             return 0;
-        }
+        } // End of method "calculate_value"
 
+        /* Node::my_idx_as_a_child()
+         * The method returns the index of the node in the m_children array of this.m_parent()
+         * [INPUT]:
+         * void
+         * [OUTPUT]:
+         * Index of the node in the m_children array of this.m_parent()
+         * ***************************************************************************************** */
         public int my_idx_as_a_child()
         {
             Node[] parent_children = this.get_parent().get_children();
@@ -355,7 +361,7 @@ namespace FinalProject
                 }
             }
             return INVALID_VALUE;
-        }
+        } // End of method "my_idx_as_a_child"
 
 
     }
