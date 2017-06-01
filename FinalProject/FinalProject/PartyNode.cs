@@ -57,6 +57,7 @@ namespace FinalProject
         public PartyNode(Node node)
             : base(node)
         {
+            error_vectors_list = new List<int[]>();
             // m_sub_formula_tree = node;
             Type t = node.GetType();
             if (t == typeof(FinalProject.LogicNode))
@@ -74,7 +75,6 @@ namespace FinalProject
                     PartyNode tmp_node = (PartyNode)node; //vered!!!!!!!
                     m_sub_formula_tree = tmp_node.get_sub_formula_tree_ptr(); //vered!!!
                     m_protocol_node_reference = null;
-                   error_vectors_list = new List<int[]>();
                 }
 
             }
@@ -96,6 +96,7 @@ namespace FinalProject
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", node.get_type().ToString());
             }
             m_is_zero_padding = false;
+            
         }
 
         // GETTERS
@@ -112,6 +113,11 @@ namespace FinalProject
         public bool get_is_zero_padding()
         {
             return m_is_zero_padding;
+        }
+
+        public List<int[]> get_error_vectors_list()
+        {
+            return error_vectors_list;
         }
 
 
@@ -205,10 +211,8 @@ namespace FinalProject
          * [OUTPUT]:
          * void
          * ******************************************************************************************************************* */
-        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size)
+        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size, int alphabeth_size = 2)
         {
-            int alphabeth_size = m_num_of_children + 1;
-            
             // Stop condition
             if ( last_cell_in == (vector_size) )
             {
@@ -225,6 +229,75 @@ namespace FinalProject
             }
         } // End of "generate_alphabeth_vectors"
 
+        public List<int> get_real_egh_path()
+        {
+            List<int> path = new List<int>();
+            PartyNode curr_node = this;
+            while( curr_node.get_parent() != null )
+            {
+                path.Add(curr_node.my_idx_as_a_child());
+                curr_node = (PartyNode)curr_node.get_parent();
+            }
+            path.Reverse();
+            return path;
+        } // End of "get_real_egh_path"
+  
+        public List<int[]> limit_num_of_errors(List<int[]> optional_binary_vectors)
+        {
+            int vector_sum = 0;
+            int N = optional_binary_vectors[0].Length;
+            int max_num_of_errors = (int)(N * Globals.error_fraction);
+            bool flag_illegal_error = false;
 
+            List<int[]> binary_vectors_to_return = new List<int[]>();
+
+            foreach(int[] error_vector in optional_binary_vectors)
+            {
+                vector_sum = 0;
+                for (int cell_idx = 0; cell_idx < error_vector.Length; cell_idx++)
+                {
+                    vector_sum += error_vector[cell_idx];
+                    if ( vector_sum > max_num_of_errors )
+                    {
+                        // Removes illegal vectors
+                        flag_illegal_error = true;
+                        break;
+                    }
+                    if (error_vector[cell_idx] == 0)
+                        // (cells == 0) --> indicates that there is no error
+                        error_vector[cell_idx] = Globals.NO_ERROR;
+                }
+                if (flag_illegal_error == false)
+                    binary_vectors_to_return.Add(error_vector);
+
+            }
+            return binary_vectors_to_return;
+        } // End of "limit_num_of_errors"
+
+        public List<int[]> generate_legel_vectors(List<int[]> legal_error_vectors, List<int> real_egh_path)
+        {
+            List<int[]> error_vectors_per_node = new List<int[]>();
+            int error_vector_length = legal_error_vectors[0].Length;
+
+            foreach (int[] error_vector in legal_error_vectors)
+            {
+                int[] tmp_legal_error_vector = new int[error_vector_length];
+                for (int cell_idx = 0; cell_idx < error_vector_length; cell_idx++)
+                {
+                    if (error_vector[cell_idx] == (int)Globals.NO_ERROR)
+                    {
+                        tmp_legal_error_vector[cell_idx] = Globals.NO_ERROR;
+                    }
+                    else // ERROR
+                    {
+                        tmp_legal_error_vector[cell_idx] = real_egh_path[cell_idx];
+                    }
+
+                }
+                error_vectors_per_node.Add(tmp_legal_error_vector);
+            }
+
+            return error_vectors_per_node;
+        } // End of "generate_leagel_vectors"
     }
 }

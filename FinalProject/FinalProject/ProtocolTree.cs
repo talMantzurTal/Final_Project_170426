@@ -10,22 +10,50 @@ namespace FinalProject
 {
     class ProtocolTree : Tree
     {
+        // Data members:
+        List<PartyNode> m_leaves_array;
+
+        // C'TORS
         public ProtocolTree() :
             base()
         {
             Console.WriteLine("ProtocolTree c'tor");
+            m_leaves_array = new List<PartyNode>();
         }
         public ProtocolTree(PartyNode root_node) :
             base((Node)root_node)
         {
             Console.WriteLine("ProtocolTree c'tor");
+            m_leaves_array = new List<PartyNode>();
         }
         public ProtocolTree(Tree tree) :
             base(tree)
         {
             Console.WriteLine("ProtocolTree c'tor");
+            m_leaves_array = new List<PartyNode>();
         }
 
+        // GETTERS
+        PartyNode get_leaves_array_cell(int idx = 0)
+        {
+            return m_leaves_array[idx];
+        }
+
+        List<PartyNode> get_leaves_array()
+        {
+            return m_leaves_array;
+        }
+        // SETTERS 
+        public void set_leaves_array()
+        {
+            foreach ( Node node in this )
+            {
+                if (node.get_if_leaf())
+                    m_leaves_array.Add((PartyNode)node);
+            }
+        }
+
+        // METHODS:
         public Tree deep_copy() 
         {
             /* perform deep copy of the root and use this copy in order to create a sub ProtocolTree */
@@ -173,6 +201,36 @@ namespace FinalProject
             return egh_tree;
         }
 
+        public static FormulaTree reverse_kw(ProtocolTree kw_tree, ProtocolTree egh_tree)
+        {
+            PartyNode curr_node = null;
+            // Set leaves array
+            egh_tree.set_leaves_array();
+            while (curr_node != egh_tree.get_root())
+            {
+                curr_node = egh_tree.get_leaves_array_cell();
+                // Generate error binary vectors with size curr_node.depth() and limit the legal vectors
+                int[] error_vector_to_generate = new int[curr_node.get_depth()];
+                curr_node.generate_alphabeth_vectors(error_vector_to_generate, 0, error_vector_to_generate.Length, 2);
+                List<int[]> error_binary_vectors = curr_node.get_error_vectors_list();
+                error_binary_vectors = curr_node.limit_num_of_errors(error_binary_vectors);
+
+                // Foreach node in m_leaves_array, get it's path from root in egh_tree
+                List<PartyNode> leaves_array = egh_tree.get_leaves_array();
+                foreach ( PartyNode node in leaves_array)
+                {
+                    List<int> real_path_to_node = node.get_real_egh_path();
+                    List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
+                    // PartyNode::reachability()
+                }
+                
+                egh_tree.update_leaves_array();
+                
+            }
+            //return convert2FormulaTree()
+            return null; // TODO: change
+        }
+
         /* ProtocolTree::zero_padding(int tree_depth_after_padding)
          * This method perform zerro pedding of tree in order to create a complete tree.
          * [INPUT]:
@@ -258,6 +316,28 @@ namespace FinalProject
             //TreeUtils.write_tree_to_file(zero_sub_tree);
             return zero_sub_tree;
         } // End of "create_zero_sub_tree"
+
+        void update_leaves_array()
+        {
+            PartyNode curr_parent = new PartyNode();
+            PartyNode prev_parent = new PartyNode();
+            //int idx = 0;
+            List<PartyNode> leave_array_cpy = new List<PartyNode>();
+            foreach( Node node in m_leaves_array )
+            {
+                curr_parent = (PartyNode)node.get_parent();
+                if ( prev_parent != curr_parent)
+                {
+                    leave_array_cpy.Add(curr_parent);
+                    prev_parent = curr_parent;
+                    //idx++;
+                }
+            }
+            m_leaves_array = leave_array_cpy;
+        } // End of "update_leaves_array"
+
+      
+
     }
 }
 
