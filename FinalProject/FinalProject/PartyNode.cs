@@ -11,7 +11,6 @@ namespace FinalProject
     class PartyNode : Node
     {
         private Node m_sub_formula_tree;
-        private string m_input;
         private PartyNode m_protocol_node_reference; // used for egh transformation
         private bool m_is_zero_padding;
         public List<int[]> error_vectors_list;
@@ -31,7 +30,6 @@ namespace FinalProject
             }
             // TODO - KW function creats the party node with a suitable "root" of sub_formula_tree
             // m_sub_formula_tree = new FormulaTree(m_num_of_children,null);
-            m_input = null;
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
             error_vectors_list = new List<int[]>();
@@ -50,7 +48,6 @@ namespace FinalProject
             }
             // TODO - KW function creats the party node with a suitable "root" of sub_formula_tree
             // m_sub_formula_tree = new FormulaTree(m_num_of_children,null);
-            m_input = null;
             m_sub_formula_tree = f_tree;
             m_protocol_node_reference = null;
             m_is_zero_padding = false;

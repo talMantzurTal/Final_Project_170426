@@ -46,8 +46,9 @@ namespace FinalProject
         // SETTERS 
         public void set_leaves_array()
         {
-            foreach ( Node node in this )
+            foreach ( PartyNode node in this )
             {
+                
                 if (node.get_if_leaf())
                     m_leaves_array.Add((PartyNode)node);
             }
@@ -204,13 +205,24 @@ namespace FinalProject
         public static FormulaTree reverse_kw(ProtocolTree kw_tree, ProtocolTree egh_tree)
         {
             PartyNode curr_node = null;
+            int leaf_idx = 0;
             // Set leaves array
             egh_tree.set_leaves_array();
             while (curr_node != egh_tree.get_root())
             {
                 if (egh_tree.get_leaves_array().Count == 0) //list is empty - all nodes are reachable!
                     break;
-                curr_node = egh_tree.get_leaves_array_cell();
+                curr_node = egh_tree.get_leaves_array_cell(leaf_idx);
+                /* set zero nodes as UNREACHABLE and look for the first node in leaves array which isn't zero */
+                while (curr_node.get_name() == "0")
+                {
+                    curr_node.set_reachable(reachable_type.UNREACHABLE);
+                    curr_node = egh_tree.get_leaves_array_cell(leaf_idx++);
+                }
+                    
+                /* if current leaves array contains only 0 leaves,continue to upper level in tree */
+                if (leaf_idx == egh_tree.get_leaves_array().Count - 1)
+                    break;
                 // Generate error binary vectors with size curr_node.depth() and limit the legal vectors
                 int[] error_vector_to_generate = new int[curr_node.get_depth()];
                 curr_node.generate_alphabeth_vectors(error_vector_to_generate, 0, error_vector_to_generate.Length, 2);
@@ -269,7 +281,7 @@ namespace FinalProject
         Tree create_zero_sub_tree(int tree_depth_after_padding, node_type type_parent = node_type.BOB ,int start_depth = 0)
         {
             string name = "0";
-            int idx_for_name = 0;
+          //  int idx_for_name = 0;
             node_type type;
             if ( type_parent == node_type.ALICE ) type= node_type.BOB;
             else if (type_parent == node_type.BOB) type = node_type.ALICE;
@@ -279,7 +291,7 @@ namespace FinalProject
             PartyNode cur_node_parent = new PartyNode();
             PartyNode root_zero_tree = new PartyNode(name,type,cur_depth_child, this.m_num_of_children);
             cur_node_parent = root_zero_tree;
-
+           
             if (cur_node_parent.get_depth() != tree_depth_after_padding)
             {
                 while (((cur_node_parent == root_zero_tree) && (root_zero_tree.get_last_child_idx() < (m_num_of_children - 1))) || (cur_node_parent != root_zero_tree))
@@ -292,13 +304,10 @@ namespace FinalProject
                         else throw new System.ArgumentException("create_zero_sub_tree2: Illegal type for party node {0}", cur_node_parent.get_type().ToString());
                         // Depth
                         cur_depth_child = cur_node_parent.get_depth() + 1;
-                        // Name 
-                        idx_for_name++;
-                        name = idx_for_name.ToString();
-
-                        // Create a new PartyNode
+                   
+                        // Create a new PartyNode and set it as UNREACHABLE
                         PartyNode child_to_add = new PartyNode(name, type, cur_depth_child, this.m_num_of_children);
-
+                        
                         child_to_add.set_is_zero_padding(true);
                         cur_node_parent.inc_last_child_idx();
                         //cur_node_parent.add_child(child_to_add, cur_node_parent.get_last_child_idx());
@@ -331,12 +340,16 @@ namespace FinalProject
             {
                 curr_parent = (PartyNode)node.get_parent();
                 if ( prev_parent != curr_parent)
-                {  
+                {
+                    if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
+                        throw new System.ArgumentException("update_leaves_array: node {0} is UNREACHABLE?!", curr_parent.get_name().ToString());
+                    if (curr_parent.get_name() == "0")
+                        curr_parent.set_reachable(reachable_type.UNREACHABLE);
                     if((curr_parent.get_reachable()) == reachable_type.NA)
                         /* Node wasn't examine yet - Add it to list in order to check its reachability */
                         leave_array_cpy.Add(curr_parent);
                     else if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
-                        throw new System.ArgumentException("update_leaves_array: node {0} is UNREACHABLE?!", curr_parent.get_name().ToString());
+                        
                     prev_parent = curr_parent;
                    
                 }
