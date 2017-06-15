@@ -46,16 +46,16 @@ namespace FinalProject
         // SETTERS 
         public void set_leaves_array()
         {
-            foreach ( PartyNode node in this )
+            foreach (PartyNode node in this)
             {
-                
+
                 if (node.get_if_leaf())
                     m_leaves_array.Add((PartyNode)node);
             }
         }
 
         // METHODS:
-        public Tree deep_copy() 
+        public Tree deep_copy()
         {
             /* perform deep copy of the root and use this copy in order to create a sub ProtocolTree */
             Node cloned_root = m_root.deep_copy();
@@ -116,7 +116,7 @@ namespace FinalProject
                 if (!p_tmp_node.get_name().Equals(f_root.get_name()))
                 {
                     Node parent_node = Tree.preOrder(p_root, n.get_parent().get_name(), true);
-                      parent_node.add_child(p_tmp_node);
+                    parent_node.add_child(p_tmp_node);
                 }
                 Console.WriteLine(n.get_name());
 
@@ -153,16 +153,16 @@ namespace FinalProject
             int num_of_children = kw_tree.get_root().get_num_of_children();
             int num_of_children_idx = num_of_children - 1;
             double depth_strech_param = (Globals.egh_immune / Globals.eps);
-            int egh_desired_depth = (int)depth_strech_param*kw_tree.get_depth();
+            int egh_desired_depth = (int)depth_strech_param * kw_tree.get_depth();
 
             Console.WriteLine("EGH");
             Console.WriteLine("---");
-            
+
             foreach (PartyNode egh_node in egh_tree)
             {
                 Node sub_tree_root_kw = new PartyNode();
                 // List <Node> sub_formula_arr = new List<Node>();
-                if (egh_node.get_depth() < 2)   
+                if (egh_node.get_depth() < 2)
                 {
                     /* The node's grandparent is the root itself,               */
                     /* set the current node's error child as the root's subtree */
@@ -170,11 +170,11 @@ namespace FinalProject
                     sub_tree_root_kw = egh_node.get_protocol_node_reference();
 
                 }
-                else  
+                else
                 {
                     /* Replace the current node last child with the current node's grandparent sub_tree */
                     tmp_node_egh = (PartyNode)egh_node.get_parent(copy_flags.SHALLOW).get_parent(copy_flags.SHALLOW);
-                    sub_tree_root_kw = tmp_node_egh.get_protocol_node_reference(); 
+                    sub_tree_root_kw = tmp_node_egh.get_protocol_node_reference();
 
                 }
 
@@ -192,7 +192,7 @@ namespace FinalProject
                         egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
                     }
                 }
-               }
+            }
 
             // TreeUtils.write_tree_to_file(egh_tree);
             // Perform Zero padding
@@ -227,17 +227,22 @@ namespace FinalProject
                 if (egh_tree.get_leaves_array().Count == 0) //list is empty - all nodes are reachable!
                     break;
                 curr_node = egh_tree.get_leaves_array_cell(leaf_idx);
-                /* set zero nodes as UNREACHABLE and look for the first node in leaves array which isn't zero */
+                /* set zero nodes as UNREACHABLE and look for the first node in leaves array which isn't 
+                 * zero in order to check if it's reachable */
                 while (curr_node.get_name() == "0")
                 {
                     curr_node.set_reachable(reachable_type.UNREACHABLE);
                     curr_node = egh_tree.get_leaves_array_cell(leaf_idx++);
                 }
-                    
+
                 /* if current leaves array contains only 0 leaves,continue to upper level in tree */
                 if (leaf_idx == egh_tree.get_leaves_array().Count - 1)
-                    break;
-                // Generate error binary vectors with size curr_node.depth() and limit the legal vectors
+                {
+                    egh_tree.update_leaves_array();
+                    continue;
+                }
+                // Generate error binary vectors with size curr_node.depth() and limit the legal vectors by the desired 
+                // error fraction
                 int[] error_vector_to_generate = new int[curr_node.get_depth()];
                 curr_node.generate_alphabeth_vectors(error_vector_to_generate, 0, error_vector_to_generate.Length, 2);
                 List<int[]> error_binary_vectors = curr_node.get_error_vectors_list();
@@ -248,16 +253,16 @@ namespace FinalProject
                 // 2. Generate leagl error vectors from "error_binary_vectors"
                 // 3. Check if the node is reachable
                 List<PartyNode> leaves_array = egh_tree.get_leaves_array();
-                foreach ( PartyNode node in leaves_array)
+                foreach (PartyNode node in leaves_array)
                 {
                     List<int> real_path_to_node = node.get_real_egh_path();
                     List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
                     node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
-                    
+
                 }
-                
+
                 egh_tree.update_leaves_array();
-                
+
             }
             //return convert2FormulaTree()
             return null; // TODO: change
@@ -270,8 +275,8 @@ namespace FinalProject
          * [OUTPUT]:
          * None
          * [Algoritm]:
-         * go over all tree's nodes and for each node do:                                 
-         * if the node depth is less than the desired tree depth and at least one of it's childrens               
+         * Go over all tree's nodes and for each node do:                                 
+         * If the node depth is less than the desired tree depth and at least one of it's childrens               
          * is null, set this children with a zero subtree with depth = (egh_desired_depth - current node's depth)
          * Note that in order to create a zero subtree, this function calls create_zero_sub_tree.                   
          **********************************************************************************************************/
@@ -280,18 +285,17 @@ namespace FinalProject
             ProtocolTree zero_sub_tree = new ProtocolTree();
             foreach (Node node in this)
             {
-                for (int child_idx = 0; child_idx < m_num_of_children; child_idx++ )
+                for (int child_idx = 0; child_idx < m_num_of_children; child_idx++)
                 {
-                   if ((node.get_depth() < tree_depth_after_padding) && (node.get_child(child_idx) == null))
-                   {
-                       zero_sub_tree =(ProtocolTree) create_zero_sub_tree(tree_depth_after_padding, node.get_type(), node.get_depth() + 1 );
-                        //node.add_child(zero_sub_tree.get_root());
+                    if ((node.get_depth() < tree_depth_after_padding) && (node.get_child(child_idx) == null))
+                    {
+                        zero_sub_tree = (ProtocolTree)create_zero_sub_tree(tree_depth_after_padding, node.get_type(), node.get_depth() + 1);
                         node.add_child(zero_sub_tree.get_root());
                     }
-                }               
+                }
             }
             TreeUtils.write_tree_to_file(this);
-        }
+        } // End of "zero_padding"
 
         /* ProtocolTree::create_zero_sub_tree()
          * This method create a ternary tree of zeroes in a specific depth
@@ -303,51 +307,57 @@ namespace FinalProject
          * [OUTPUT]:
          * Tree of zeroes. Each node in the tree has a type of ALICE/BOB in an alternating order.                  
          **********************************************************************************************************/
-        Tree create_zero_sub_tree(int tree_depth_after_padding, node_type type_parent = node_type.BOB ,int start_depth = 0)
+        Tree create_zero_sub_tree(int tree_depth_after_padding, node_type type_parent = node_type.BOB, int start_depth = 0)
         {
             string name = "0";
-          //  int idx_for_name = 0;
             node_type type;
-            if ( type_parent == node_type.ALICE ) type= node_type.BOB;
+            // Set the root type of the zero sub tree different of it's parent
+            if (type_parent == node_type.ALICE) type = node_type.BOB;
             else if (type_parent == node_type.BOB) type = node_type.ALICE;
             else throw new System.ArgumentException("create_zero_sub_tree1: Illegal type for party node", type_parent.ToString());
+
             int cur_depth_child = start_depth;
-            
-            PartyNode cur_node_parent = new PartyNode();
-            PartyNode root_zero_tree = new PartyNode(name,type,cur_depth_child, this.m_num_of_children);
-            cur_node_parent = root_zero_tree;
-           
-            if (cur_node_parent.get_depth() != tree_depth_after_padding)
+            PartyNode curr_node_parent = new PartyNode();
+            PartyNode root_zero_tree = new PartyNode(name, type, cur_depth_child, this.m_num_of_children);
+
+            curr_node_parent = root_zero_tree;
+
+            // Build a zero sub tree in a specific depth (tree_depth_after_padding - start_depth).
+            // Preorder 
+            if (curr_node_parent.get_depth() != tree_depth_after_padding)
             {
-                while (((cur_node_parent == root_zero_tree) && (root_zero_tree.get_last_child_idx() < (m_num_of_children - 1))) || (cur_node_parent != root_zero_tree))
+                // Keep add children while the root hasn't finished to add children.
+                while (((curr_node_parent == root_zero_tree) && (root_zero_tree.get_last_child_idx() < (m_num_of_children - 1))) || (curr_node_parent != root_zero_tree))
                 {
-                    while ((cur_node_parent.get_depth() < tree_depth_after_padding) && (cur_node_parent.get_last_child_idx() < (m_num_of_children - 1)))
+                    // Add children to an internal nodes (curr_node)
+                    while ((curr_node_parent.get_depth() < tree_depth_after_padding) && (curr_node_parent.get_last_child_idx() < (m_num_of_children - 1)))
                     {
                         // Type
-                        if (cur_node_parent.get_type() == node_type.ALICE) type = node_type.BOB;
-                        else if (cur_node_parent.get_type() == node_type.BOB) type = node_type.ALICE;
-                        else throw new System.ArgumentException("create_zero_sub_tree2: Illegal type for party node {0}", cur_node_parent.get_type().ToString());
+                        if (curr_node_parent.get_type() == node_type.ALICE) type = node_type.BOB;
+                        else if (curr_node_parent.get_type() == node_type.BOB) type = node_type.ALICE;
+                        else throw new System.ArgumentException("create_zero_sub_tree2: Illegal type for party node {0}", curr_node_parent.get_type().ToString());
                         // Depth
-                        cur_depth_child = cur_node_parent.get_depth() + 1;
-                   
-                        // Create a new PartyNode and set it as UNREACHABLE
+                        cur_depth_child = curr_node_parent.get_depth() + 1;
+
+                        // Create a new PartyNode with the above parameters
                         PartyNode child_to_add = new PartyNode(name, type, cur_depth_child, this.m_num_of_children);
-                        
+
+                        // Add the new PartyNode as a child to curr_node
                         child_to_add.set_is_zero_padding(true);
-                        cur_node_parent.inc_last_child_idx();
-                        //cur_node_parent.add_child(child_to_add, cur_node_parent.get_last_child_idx());
-                        cur_node_parent.add_child(child_to_add, cur_node_parent.get_last_child_idx());
-                        //child_to_add.set_parent(cur_node_parent);
-                        cur_node_parent = child_to_add;
+                        curr_node_parent.inc_last_child_idx();
+                        curr_node_parent.add_child(child_to_add, curr_node_parent.get_last_child_idx());
+                        curr_node_parent = child_to_add;
 
                     }
-                    if (cur_node_parent.get_parent() != null)
+                    // If curr_node != root, move upstream
+                    if (curr_node_parent.get_parent() != null)
                     {
-                        cur_node_parent = (PartyNode)cur_node_parent.get_parent();
+                        curr_node_parent = (PartyNode)curr_node_parent.get_parent();
                     }
+                    // If curr_node == root, move orizontally to the next child
                     else
                     {
-                        cur_node_parent = (PartyNode)cur_node_parent.get_child(cur_node_parent.get_last_child_idx());
+                        curr_node_parent = (PartyNode)curr_node_parent.get_child(curr_node_parent.get_last_child_idx());
                     }
                 }
             }
@@ -370,29 +380,31 @@ namespace FinalProject
             PartyNode curr_parent = new PartyNode();
             PartyNode prev_parent = new PartyNode();
             List<PartyNode> leave_array_cpy = new List<PartyNode>();
-            foreach( Node node in m_leaves_array )
+
+            // Iterate over all nodes in m_leave_array. Foreach node and add it's parent to m_leaves_array if it's an reachable_type.NA 
+            // reachble and not a zero leaf  
+            foreach (Node node in m_leaves_array)
             {
                 curr_parent = (PartyNode)node.get_parent();
-                if ( prev_parent != curr_parent)
+                if (prev_parent != curr_parent)
                 {
                     if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
                         throw new System.ArgumentException("update_leaves_array: node {0} is UNREACHABLE?!", curr_parent.get_name().ToString());
                     if (curr_parent.get_name() == "0")
                         curr_parent.set_reachable(reachable_type.UNREACHABLE);
-                    if((curr_parent.get_reachable()) == reachable_type.NA)
-                        /* Node wasn't examine yet - Add it to list in order to check its reachability */
+                    if ((curr_parent.get_reachable()) == reachable_type.NA)
+                        /* Node wasn't examine if it's reachable yet - Add it to list in order to check its reachability */
                         leave_array_cpy.Add(curr_parent);
-                    else if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
-                        
+
                     prev_parent = curr_parent;
-                   
+
                 }
             }
-            //Note: in case that all nodes are reachable, m_leaves will be empty. 
+            // Note: in case that all nodes are reachable, m_leaves_array will be empty. 
             m_leaves_array = leave_array_cpy;
         } // End of "update_leaves_array"
 
-      
+
 
     }
 }
