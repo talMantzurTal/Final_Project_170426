@@ -240,7 +240,7 @@ namespace FinalProject
          * 
          * [OUTPUT]:
          * void
-         * ******************************************************************************************************************* */
+         * *********************************************************************************************************/
         public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size, int alphabeth_size = 2)
         {
             // Stop condition
@@ -259,6 +259,16 @@ namespace FinalProject
             }
         } // End of "generate_alphabeth_vectors"
 
+
+        /* PartyNode::get_real_egh_path()
+         * This method returns the path (in EGH tree) from root to a specified Node.
+         * 
+         * [INPUT]:
+         * None
+         * 
+         * [OUTPUT]:
+         * List<int> path = list of children indices from root to a specified leaf. (induced path)
+         * ********************************************************************************************************************/
         public List<int> get_real_egh_path()
         {
             List<int> path = new List<int>();
@@ -271,7 +281,18 @@ namespace FinalProject
             path.Reverse();
             return path;
         } // End of "get_real_egh_path"
-  
+
+        /* PartyNode::limit_num_of_errors()
+        * This method goes over all binary vectors which define errors (1 = error , 0= no error)
+        * and for each vector checks: if the number of errors (cells that contains 1)
+        * are bigger than error limit -> dispose this vector.
+        * 
+        * [INPUT]:
+        * optional_binary_vectors = list of all binary vector with size n (2^n vectors)
+        * 
+        * [OUTPUT]:
+        * limit_num_of_errors = list of legal error vectors - don't contain more than ERROR_FRACTION errors.
+        * ********************************************************************************************************************/
         public List<int[]> limit_num_of_errors(List<int[]> optional_binary_vectors)
         {
             int vector_sum = 0;
@@ -304,6 +325,19 @@ namespace FinalProject
             return binary_vectors_to_return;
         } // End of "limit_num_of_errors"
 
+        /* PartyNode::generate_legel_vectors()
+        * This method generates all legal vectors (including some fraction of errors according to user's constraint)
+        * which define path from root to a specified node.
+        * 
+        * [INPUT]:
+        * legal_error_vectors = list of binary vectors (1 = erro, 0 = no error), which contains only
+        * vectors with a legal num of errors (restrictes amount of errors according to user's definition).
+        * real_egh_path       = list of child indices which define a path from root to node in EGH tree.
+        * 
+        * [OUTPUT]:
+        * error_vectors_per_node = List of error vectors which suitable to a specified node. each one of 
+        * those vectors defines a path from root to node including some errors. (contain all egal options).
+        * ********************************************************************************************************************/
         public List<int[]> generate_legel_vectors(List<int[]> legal_error_vectors, List<int> real_egh_path)
         {
             List<int[]> error_vectors_per_node = new List<int[]>();
@@ -330,6 +364,32 @@ namespace FinalProject
             return error_vectors_per_node;
         } // End of "generate_leagel_vectors"
 
+        /* PartyNode::is_reachable()
+        * This method check if a specified node is reachable.
+        * For each given error vector:
+        * start from root and traverse kw_tree according to current error_vector and the given egh_path
+        * in case that the path ends with a leaf - the node is reachable, stop checking. else, 
+        * check next error vector in the given list.
+        * In case that the method done iterating all error vectors- the node isn't reachable.
+        * The tour over the tree is performed according to reachability algorithm:
+        * In case that no error occured: move to the i't child according to EGH given path.
+        * In case of error: As long as the error symbol - i, isn't the reverse symbol, continue
+        * to the i't child. In case the symbol is the reverse symbol - go back to grandparent.
+        * Note that if the current node has depth less than 2 (doesn't have grandparent), stay at 
+        * current node.
+        * In addition, the EGH path vector is larger than KW tree's depth. In order to simulate the
+        * protocol correctly, when arrive to a leaf node, start transmitting zeros (each leaf has zero
+        * counter which defines the location in the simulated protocol (which has the same length as EGH protocol).
+        * 
+        * [INPUT]:
+        * error_vectors_per_node = List of error vectors which suitable to a specified node. each one of 
+        * those vectors defines a path from root to node including some errors. (contain all egal options).
+        * 
+        * egh_path_to_node  = list of child indices which define a path from root to node in EGH tree.
+        * 
+        * [OUTPUT]:
+        * None
+        * ********************************************************************************************************************/
         public void is_reachable(ProtocolTree kw_tree, List<int[]> error_vectors_per_node, List<int> egh_path_to_node)
         {
             this.set_reachable(reachable_type.UNREACHABLE);
