@@ -100,7 +100,7 @@ namespace FinalProject
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", node.get_type().ToString());
             }
             m_is_zero_padding = false;
-            m_m_zero_node_counter = 0;
+            m_zero_node_counter = 0;
         }
 
         // GETTERS

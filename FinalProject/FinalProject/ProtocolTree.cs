@@ -208,6 +208,8 @@ namespace FinalProject
             egh_tree.set_leaves_array();
             while (curr_node != egh_tree.get_root())
             {
+                if (egh_tree.get_leaves_array().Count == 0) //list is empty - all nodes are reachable!
+                    break;
                 curr_node = egh_tree.get_leaves_array_cell();
                 // Generate error binary vectors with size curr_node.depth() and limit the legal vectors
                 int[] error_vector_to_generate = new int[curr_node.get_depth()];
@@ -284,7 +286,7 @@ namespace FinalProject
                         // Type
                         if (cur_node_parent.get_type() == node_type.ALICE) type = node_type.BOB;
                         else if (cur_node_parent.get_type() == node_type.BOB) type = node_type.ALICE;
-                        else throw new System.ArgumentException("create_zero_sub_tree2: Illegal type for party node", cur_node_parent.get_type().ToString());
+                        else throw new System.ArgumentException("create_zero_sub_tree2: Illegal type for party node {0}", cur_node_parent.get_type().ToString());
                         // Depth
                         cur_depth_child = cur_node_parent.get_depth() + 1;
                         // Name 
@@ -321,18 +323,22 @@ namespace FinalProject
         {
             PartyNode curr_parent = new PartyNode();
             PartyNode prev_parent = new PartyNode();
-            //int idx = 0;
             List<PartyNode> leave_array_cpy = new List<PartyNode>();
             foreach( Node node in m_leaves_array )
             {
                 curr_parent = (PartyNode)node.get_parent();
                 if ( prev_parent != curr_parent)
-                {
-                    leave_array_cpy.Add(curr_parent);
+                {  
+                    if((curr_parent.get_reachable()) == reachable_type.NA)
+                        /* Node wasn't examine yet - Add it to list in order to check its reachability */
+                        leave_array_cpy.Add(curr_parent);
+                    else if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
+                        throw new System.ArgumentException("update_leaves_array: node {0} is UNREACHABLE?!", curr_parent.get_name().ToString());
                     prev_parent = curr_parent;
-                    //idx++;
+                   
                 }
             }
+            //Note: in case that all nodes are reachable, m_leaves will be empty. 
             m_leaves_array = leave_array_cpy;
         } // End of "update_leaves_array"
 
