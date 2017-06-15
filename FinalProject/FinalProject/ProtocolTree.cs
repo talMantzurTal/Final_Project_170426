@@ -219,28 +219,35 @@ namespace FinalProject
         public static FormulaTree reverse_kw(ProtocolTree kw_tree, ProtocolTree egh_tree)
         {
             PartyNode curr_node = null;
-            int leaf_idx = 0;
+            int zero_leaves_counter = 0;
+
             // Set leaves array
             egh_tree.set_leaves_array();
+            
             while (curr_node != egh_tree.get_root())
             {
                 if (egh_tree.get_leaves_array().Count == 0) //list is empty - all nodes are reachable!
                     break;
-                curr_node = egh_tree.get_leaves_array_cell(leaf_idx);
+                zero_leaves_counter = 0;
                 /* set zero nodes as UNREACHABLE and look for the first node in leaves array which isn't 
                  * zero in order to check if it's reachable */
-                while (curr_node.get_name() == "0")
+                for (int idx = 0; idx < egh_tree.get_leaves_array().Count; idx++)
                 {
-                    curr_node.set_reachable(reachable_type.UNREACHABLE);
-                    curr_node = egh_tree.get_leaves_array_cell(leaf_idx++);
+                    curr_node = egh_tree.get_leaves_array_cell(idx);
+                    if (curr_node.get_name() == "0")
+                    {
+                        curr_node.set_reachable(reachable_type.UNREACHABLE);
+                        zero_leaves_counter++;
+                    }
                 }
 
                 /* if current leaves array contains only 0 leaves,continue to upper level in tree */
-                if (leaf_idx == egh_tree.get_leaves_array().Count - 1)
+                if (zero_leaves_counter == egh_tree.get_leaves_array().Count - 1)
                 {
                     egh_tree.update_leaves_array();
                     continue;
                 }
+
                 // Generate error binary vectors with size curr_node.depth() and limit the legal vectors by the desired 
                 // error fraction
                 int[] error_vector_to_generate = new int[curr_node.get_depth()];
@@ -255,10 +262,10 @@ namespace FinalProject
                 List<PartyNode> leaves_array = egh_tree.get_leaves_array();
                 foreach (PartyNode node in leaves_array)
                 {
+                    if (node.get_name() == "0") continue;
                     List<int> real_path_to_node = node.get_real_egh_path();
                     List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
                     node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
-
                 }
 
                 egh_tree.update_leaves_array();
@@ -385,6 +392,7 @@ namespace FinalProject
             // reachble and not a zero leaf  
             foreach (Node node in m_leaves_array)
             {
+                if (node.get_parent() == null) continue;
                 curr_parent = (PartyNode)node.get_parent();
                 if (prev_parent != curr_parent)
                 {
@@ -404,7 +412,22 @@ namespace FinalProject
             m_leaves_array = leave_array_cpy;
         } // End of "update_leaves_array"
 
-
+        /* ProtocolTree::copy_leaves_array_from_idx()
+         * This method copies m_leaves_array to itself starting an intput index to the end.
+         * [INPUT]:
+         * start_idx = the first index we want to copy
+         * [OUTPUT]:
+         * void               
+         **********************************************************************************************************/
+        void copy_leaves_array_from_idx_to_end(int start_idx = 0)
+        {
+            List<PartyNode> leave_array_cpy = new List<PartyNode>();
+            for (int idx = start_idx; idx < this.get_leaves_array().Count; idx++)
+            {
+                leave_array_cpy.Add(m_leaves_array[idx]);
+            }
+            m_leaves_array = leave_array_cpy;
+        } // End of "copy_leaves_array_from_idx_to_end"
 
     }
 }

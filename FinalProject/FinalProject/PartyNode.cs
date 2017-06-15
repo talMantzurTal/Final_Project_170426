@@ -335,6 +335,7 @@ namespace FinalProject
             this.set_reachable(reachable_type.UNREACHABLE);
             int iterate_idx = 0;
             PartyNode curr_node = (PartyNode)kw_tree.get_root();
+            PartyNode tmp_egh_node = new PartyNode();
 
             foreach ( int[] error_vector in error_vectors_per_node)
             {
@@ -359,24 +360,34 @@ namespace FinalProject
                             // Check if the depth of curr_node >= 2. In that case, back to the grandparent
                             // else (if depth of curr_node < 2), stay on curr_node
                             if (curr_node.get_depth() >= 2)
-                                curr_node.get_parent().get_parent();
+                                curr_node = (PartyNode)curr_node.get_parent().get_parent();
                         }
+                        // If there was no error -> go by the original intention: follow the egh_path
                         else if (error_vector[iterate_idx] == Globals.NO_ERROR)
-                            // If there was no error -> go by the original intention: follow the egh_path
-                            curr_node = (PartyNode)curr_node.get_child( egh_path_to_node[iterate_idx] );
+                        {
+                            // If in the egh_tree the next step is child #2 => reverse to grandparent only if the depth >= 2
+                            if ( egh_path_to_node[iterate_idx] == (curr_node.get_num_of_children() - 1) )
+                            {
+                                if (curr_node.get_depth() >= 2)
+                                    curr_node = (PartyNode)curr_node.get_parent().get_parent();
+                            }
+                            else curr_node = (PartyNode)curr_node.get_child(egh_path_to_node[iterate_idx]);
+                        }
                         else if ((error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && (error_vector[iterate_idx] >= 0))
-                            curr_node = (PartyNode)curr_node.get_child( error_vector[iterate_idx] );
+                            curr_node = (PartyNode)curr_node.get_child(error_vector[iterate_idx]);
                         else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());
                     }
                     if ( curr_node.get_if_leaf() )
                     {
-                        this.m_reachable = reachable_type.REACHABLE;
+                        tmp_egh_node = this;
+                        //tmp_egh_node.m_reachable = reachable_type.REACHABLE;
                         // update that all path from root to this is reachble
-                        while (curr_node.get_parent() != null)
+                        while (tmp_egh_node.get_parent() != null)
                         {
-                            curr_node.set_reachable(reachable_type.REACHABLE);
-                            curr_node = (PartyNode)curr_node.get_parent();
+                            tmp_egh_node.set_reachable(reachable_type.REACHABLE);
+                            tmp_egh_node = (PartyNode)tmp_egh_node.get_parent();
                         }
+                        tmp_egh_node.set_reachable(reachable_type.REACHABLE);
                         return;
                         }
                     iterate_idx++;
