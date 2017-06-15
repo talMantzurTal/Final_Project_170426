@@ -15,7 +15,9 @@ namespace FinalProject
         private PartyNode m_protocol_node_reference; // used for egh transformation
         private bool m_is_zero_padding;
         public List<int[]> error_vectors_list;
-        public static int idx_list = 0;
+        private int m_zero_node_counter;
+        private reachable_type m_reachable;
+
 
         // C'TOR
         public PartyNode()
@@ -33,6 +35,7 @@ namespace FinalProject
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
             error_vectors_list = new List<int[]>();
+            m_zero_node_counter = 0;
         }
 
         public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent = null, Node f_tree = null) :
@@ -52,6 +55,7 @@ namespace FinalProject
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
             error_vectors_list = new List<int[]>();
+            m_zero_node_counter = 0;
         }
 
         public PartyNode(Node node)
@@ -96,7 +100,7 @@ namespace FinalProject
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", node.get_type().ToString());
             }
             m_is_zero_padding = false;
-            
+            m_m_zero_node_counter = 0;
         }
 
         // GETTERS
@@ -120,6 +124,16 @@ namespace FinalProject
             return error_vectors_list;
         }
 
+        public reachable_type get_reachable()
+        {
+            return m_reachable;
+        }
+
+        public int get_zero_node_counter()
+        {
+            return m_zero_node_counter;
+        }
+
 
         // SETTERS
         /* Node::set_sub_formula_tree_ptr()
@@ -139,6 +153,25 @@ namespace FinalProject
             m_is_zero_padding = flag;
         }
 
+        public void set_reachable(reachable_type reachable_in)
+        {
+            m_reachable = reachable_in;
+        }
+
+        public void set_zero_node_counter(int zero_node_counter)
+        {
+            m_zero_node_counter = zero_node_counter;
+        }
+
+        public void inc_zero_node_counter()
+        {
+            m_zero_node_counter++;
+        }
+
+        public void dec_zero_node_counter()
+        {
+            m_zero_node_counter--;
+        }
         // METHODS 
 
         /* PartyNode::deep_copy()
@@ -299,5 +332,56 @@ namespace FinalProject
 
             return error_vectors_per_node;
         } // End of "generate_leagel_vectors"
+
+        public void is_reachable(ProtocolTree kw_tree, List<int[]> error_vectors_per_node, List<int> egh_path_to_node)
+        {
+            this.set_reachable(reachable_type.UNREACHABLE);
+            int iterate_idx = 0;
+            PartyNode curr_node = (PartyNode)kw_tree.get_root();
+
+            foreach ( int[] error_vector in error_vectors_per_node)
+            {
+                iterate_idx = 0;
+                curr_node = (PartyNode)kw_tree.get_root();
+                while ( iterate_idx < error_vector.Length )
+                {
+                    if ( curr_node.get_if_leaf() )
+                    {
+                        if (error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1))
+                            curr_node.inc_zero_node_counter();
+                        //else if ()
+                    }
+                    iterate_idx++;
+                }
+            }
+            /* this.reachble = false;
+             * 
+             * iterte all error vectors:
+             * foreach (error_vector):
+             *      start from root and traverse kw_tree according to the error_vector and to the egh_path:
+             *      
+             *      if ( curr_node.is_leaf() )
+             *      {
+             *          error_vector[i] = m_num_children - 1 => curr_node.cpunter -= 2;
+             *          error_vector[i] = curr_node.cpunter += 1;
+             *          0 <= error_vector[i] < m_num_children - 1  => curr_node.cpunter += 1;
+             *      }
+             *      else
+             *          error_vector[i] = m_num_children - 1 => return to the grand parent. if depth < 2 => don't move.
+             *          error_vector[i] = Globals.NO_ERROR => go the m_children[ egh_path_to_node[i] ].
+             *          0 <= error_vector[i] < m_num_children - 1 , m_children[ error_vector[i] ].
+             *          else, throw
+             *          
+             *      if ( curr_node.is_leaf ) 
+             *      {
+             *          this.reachble = true;
+             *          // update that all path from root to this is reachble
+             *          while ( tmp_node.get_parent != null )
+             *              tmp_node.reable = true;
+             *              tmp_node = tmp_node.get_parent;
+             *          return;
+             *      }
+             */
+        }
     }
 }

@@ -157,17 +157,17 @@ namespace FinalProject
             Console.WriteLine("EGH");
             Console.WriteLine("---");
             
-            foreach (Node egh_node in egh_tree)
+            foreach (PartyNode egh_node in egh_tree)
             {
                 Node sub_tree_root_kw = new PartyNode();
-                List <Node> sub_formula_arr = new List<Node>();
+                // List <Node> sub_formula_arr = new List<Node>();
                 if (egh_node.get_depth() < 2)   
                 {
                     /* The node's grandparent is the root itself,               */
                     /* set the current node's error child as the root's subtree */
-                    tmp_node_egh = (PartyNode)egh_tree.get_root(copy_flags.SHALLOW);
-                    sub_tree_root_kw = kw_tree.get_root();
-                    
+                    //tmp_node_egh = egh_node;
+                    sub_tree_root_kw = egh_node.get_protocol_node_reference();
+
                 }
                 else  
                 {

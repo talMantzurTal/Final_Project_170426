@@ -23,6 +23,13 @@ namespace FinalProject
         DEEP
     };
 
+    enum reachable_type
+    {
+        NA,
+        REACHABLE,
+        UNREACHABLE
+    };
+
     class Program
     {
         static void Main(string[] args)
