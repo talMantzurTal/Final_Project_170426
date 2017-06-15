@@ -247,7 +247,6 @@ namespace FinalProject
                     egh_tree.update_leaves_array();
                     continue;
                 }
-
                 // Generate error binary vectors with size curr_node.depth() and limit the legal vectors by the desired 
                 // error fraction
                 int[] error_vector_to_generate = new int[curr_node.get_depth()];
@@ -428,6 +427,7 @@ namespace FinalProject
             }
             m_leaves_array = leave_array_cpy;
         } // End of "copy_leaves_array_from_idx_to_end"
+
 
     }
 }
