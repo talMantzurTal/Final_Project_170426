@@ -217,13 +217,16 @@ namespace FinalProject
                 List<int[]> error_binary_vectors = curr_node.get_error_vectors_list();
                 error_binary_vectors = curr_node.limit_num_of_errors(error_binary_vectors);
 
-                // Foreach node in m_leaves_array, get it's path from root in egh_tree
+                // Foreach node in m_leaves_array:
+                // 1. Get it's path from root in egh_tree
+                // 2. Generate leagl error vectors from "error_binary_vectors"
+                // 3. Check if the node is reachable
                 List<PartyNode> leaves_array = egh_tree.get_leaves_array();
                 foreach ( PartyNode node in leaves_array)
                 {
                     List<int> real_path_to_node = node.get_real_egh_path();
                     List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
-                    // PartyNode::reachability()
+                    node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
                 }
                 
                 egh_tree.update_leaves_array();
