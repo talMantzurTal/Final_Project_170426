@@ -40,12 +40,6 @@ namespace FinalProject
             ProtocolTree kw_tree = ProtocolTree.kw_trans(formula_tree_input);
             ProtocolTree egh_tree = ProtocolTree.egh(kw_tree);
 
-            // Check the vector generator
-            /* int vector_size = 2;
-            PartyNode node = (PartyNode)kw_tree.get_root(); // TODO
-            int[] error_vector_to_generate = new int[vector_size];
-            node.generate_alphabeth_vectors(error_vector_to_generate, 0, vector_size);*/
-
             FormulaTree resilient_formula = ProtocolTree.reverse_kw(kw_tree, egh_tree);
 
             return;

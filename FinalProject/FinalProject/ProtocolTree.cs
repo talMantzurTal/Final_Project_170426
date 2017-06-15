@@ -201,6 +201,20 @@ namespace FinalProject
             return egh_tree;
         }
 
+        /* ProtocolTree::reverse_kw()
+         * This method implements reverse KW transformation (from a protocol tree to a resilient formula, 
+         * resilient to a Global.error_fraction - eps errors in each path input-output)
+         * [INPUT]:
+         * kw_tree = a communication protocol tree, which was built from a Formula tree using KW transformation.
+         * egh_tree = a communication protocol tree, which was built from a Formula tree. The tree is not resilient 
+         *            to errors.
+         * [OUTPUT]:
+         * resilient_formula_Tree = a formula tree specified a resilient formula Global.error_fraction - eps errors 
+         *                          in each path input-output
+         * [Algoritm]:
+         * for each node (except from the root- always resilient), create the leagal error vectors and traverse the ]
+         * kw_tree. If aftre that traversion, it reached to a leaf, the node is reachale.
+         **********************************************************************************************************/
         public static FormulaTree reverse_kw(ProtocolTree kw_tree, ProtocolTree egh_tree)
         {
             PartyNode curr_node = null;
@@ -225,6 +239,7 @@ namespace FinalProject
                     List<int> real_path_to_node = node.get_real_egh_path();
                     List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
                     node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
+                    
                 }
                 
                 egh_tree.update_leaves_array();
@@ -263,7 +278,17 @@ namespace FinalProject
             }
             TreeUtils.write_tree_to_file(this);
         }
-        
+
+        /* ProtocolTree::create_zero_sub_tree()
+         * This method create a ternary tree of zeroes in a specific depth
+         * [INPUT]:
+         * tree_depth_after_padding = tree's desired depth after zero padding.
+         * type_parent              = a node_type variable. Indicates the parent's type in order to build a tree with an 
+         *                            alternating type order
+         * start_depth              = a desired tree depth.
+         * [OUTPUT]:
+         * Tree of zeroes. Each node in the tree has a type of ALICE/BOB in an alternating order.                  
+         **********************************************************************************************************/
         Tree create_zero_sub_tree(int tree_depth_after_padding, node_type type_parent = node_type.BOB ,int start_depth = 0)
         {
             string name = "0";
@@ -320,6 +345,15 @@ namespace FinalProject
             return zero_sub_tree;
         } // End of "create_zero_sub_tree"
 
+        /* ProtocolTree::update_leaves_array()
+         * This method updates m_leaves_array. The method enters the nodes of a specific depth (parents of the current 
+         * m_leaves_array), only if their m_reachable is NA (hasn;t been assigned yet). The main target of the method 
+         * is the reachability method.
+         * [INPUT]:
+         * void
+         * [OUTPUT]:
+         * void               
+         **********************************************************************************************************/
         void update_leaves_array()
         {
             PartyNode curr_parent = new PartyNode();
