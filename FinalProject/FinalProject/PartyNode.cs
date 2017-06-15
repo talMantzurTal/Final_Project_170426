@@ -100,7 +100,7 @@ namespace FinalProject
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", node.get_type().ToString());
             }
             m_is_zero_padding = false;
-            m_m_zero_node_counter = 0;
+            m_zero_node_counter = 0;
         }
 
         // GETTERS
@@ -170,7 +170,7 @@ namespace FinalProject
 
         public void dec_zero_node_counter()
         {
-            m_zero_node_counter--;
+            m_zero_node_counter -= 2;
         }
         // METHODS 
 
@@ -347,13 +347,45 @@ namespace FinalProject
                 {
                     if ( curr_node.get_if_leaf() )
                     {
-                        if (error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1))
+                        if ( error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1) )
+                            curr_node.dec_zero_node_counter();
+                        else if ( error_vector[iterate_idx] == Globals.NO_ERROR )
                             curr_node.inc_zero_node_counter();
-                        //else if ()
+                        else if ( ( error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && ( error_vector[iterate_idx] >= 0 ) )
+                            curr_node.inc_zero_node_counter();
+                        else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());
                     }
+                    else // curr_node isn't a leaf
+                    {
+                        if (error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1))
+                        {
+                            // Check if the depth of curr_node >= 2. In that case, back to the grandparent
+                            // else (if depth of curr_node < 2), stay on curr_node
+                            if (curr_node.get_depth() >= 2)
+                                curr_node.get_parent().get_parent();
+                        }
+                        else if (error_vector[iterate_idx] == Globals.NO_ERROR)
+                            // If there was no error -> go by the original intention: follow the egh_path
+                            curr_node = (PartyNode)curr_node.get_child( egh_path_to_node[iterate_idx] );
+                        else if ((error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && (error_vector[iterate_idx] >= 0))
+                            curr_node = (PartyNode)curr_node.get_child( error_vector[iterate_idx] );
+                        else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());
+                    }
+                    if ( curr_node.get_if_leaf() )
+                    {
+                        this.m_reachable = reachable_type.REACHABLE;
+                        // update that all path from root to this is reachble
+                        while (curr_node.get_parent() != null)
+                        {
+                            curr_node.set_reachable(reachable_type.REACHABLE);
+                            curr_node = (PartyNode)curr_node.get_parent();
+                        }
+                        return;
+                        }
                     iterate_idx++;
                 }
             }
+#if design
             /* this.reachble = false;
              * 
              * iterte all error vectors:
@@ -363,7 +395,7 @@ namespace FinalProject
              *      if ( curr_node.is_leaf() )
              *      {
              *          error_vector[i] = m_num_children - 1 => curr_node.cpunter -= 2;
-             *          error_vector[i] = curr_node.cpunter += 1;
+             *          error_vector[i] = Globals.NO_ERROR => curr_node.cpunter += 1;
              *          0 <= error_vector[i] < m_num_children - 1  => curr_node.cpunter += 1;
              *      }
              *      else
@@ -382,6 +414,7 @@ namespace FinalProject
              *          return;
              *      }
              */
-        }
+#endif
+        } // End of "is_reachable"
     }
 }
