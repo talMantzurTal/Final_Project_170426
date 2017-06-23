@@ -19,6 +19,7 @@ namespace FinalProject
         protected int m_leaf_idx;
         protected int m_last_child_idx;
         public const int INVALID_VALUE = -1;
+        protected bool m_is_copied;
 
         public Node()
         {
@@ -32,6 +33,7 @@ namespace FinalProject
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visited at child[0], we increment m_last_child_idx 
+            m_is_copied = false;
 
         }
 
@@ -47,6 +49,7 @@ namespace FinalProject
             m_if_leaf = true;
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
+            m_is_copied = false;
         }
 
         public Node(Node node)
@@ -60,6 +63,7 @@ namespace FinalProject
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
             m_children = null;
+            m_is_copied = false;
         }
 
 
@@ -133,6 +137,11 @@ namespace FinalProject
             return m_leaf_idx;
         }
 
+        public bool get_is_copied()
+        {
+            return m_is_copied;
+        }
+
 
         // SETTERS
         public void set_parent(Node parent)
@@ -148,6 +157,28 @@ namespace FinalProject
         public void set_if_leaf(bool if_leaf)
         {
             m_if_leaf = if_leaf;
+        }
+
+        public virtual void set_node(Node reference_node)
+        {
+            m_name = reference_node.get_name();
+            m_type = reference_node.get_type();
+            // m_depth = reference_node.get_depth();
+            m_num_of_children = reference_node.get_num_of_children();
+            // m_if_leaf = reference_node.get_if_leaf();
+            m_leaf_idx = reference_node.get_leaf_idx();
+            m_last_child_idx = reference_node.get_last_child_idx();
+            m_is_copied = false;
+        }
+
+        public void set_depth(int depth)
+        {
+            m_depth = depth;
+        }
+
+        public void set_is_copied(bool is_copied)
+        {
+            m_is_copied = is_copied;
         }
 
         // METHODS
@@ -221,19 +252,19 @@ namespace FinalProject
             return;
         }
 #endif
-       /* Node::add_child()
-        * The method add a child to a specific node int the first position that empty in node.m_children or in the
-        * index that was sent to the method. The defauld addition is shallow, but it can be added in a deep way after 
-        * creating new child.
-        * [INPUT]:
-        * new_child =        a Node type child, that we want to add to the current node
-        * child_to_add_idx = The index we desired to assign the child to in the m_children array. 
-        *                    If it isn't set, the method looks to the first empty cell to assign into
-        * flag =             The flag indicates of how to add the child: as a pointer (shallow - the default) or to create a new Node (deep)
-        * 
-        * [OUTPUT]:
-        * void
-        * ********************************************************************************************************************************** */
+        /* Node::add_child()
+         * The method add a child to a specific node int the first position that empty in node.m_children or in the
+         * index that was sent to the method. The defauld addition is shallow, but it can be added in a deep way after 
+         * creating new child.
+         * [INPUT]:
+         * new_child =        a Node type child, that we want to add to the current node
+         * child_to_add_idx = The index we desired to assign the child to in the m_children array. 
+         *                    If it isn't set, the method looks to the first empty cell to assign into
+         * flag =             The flag indicates of how to add the child: as a pointer (shallow - the default) or to create a new Node (deep)
+         * 
+         * [OUTPUT]:
+         * void
+         * ********************************************************************************************************************************** */
         public bool add_child(Node child_to_add, int child_to_add_idx = INVALID_VALUE, copy_flags flag = copy_flags.SHALLOW)
         {
             // Find the first empty child which hasn't been assigned
@@ -326,8 +357,7 @@ namespace FinalProject
 
             return copied_node;
         } // End of method "deep_copy"
-
-        // TAL
+        
         // TODO: implementation
         /* Node::calculate_value()
          * The method calculate the value of a specific node using it's sub formula tree (it's children)
@@ -362,6 +392,16 @@ namespace FinalProject
             }
             return INVALID_VALUE;
         } // End of method "my_idx_as_a_child"
+
+        public void init_last_child_idx()
+        {
+            m_last_child_idx = INVALID_VALUE;
+        }
+
+        public void init_is_copied()
+        {
+            m_is_copied = false;
+        }
 
 
     }

@@ -154,6 +154,71 @@ namespace FinalProject
             int num_of_children_idx = num_of_children - 1;
             double depth_strech_param = (Globals.egh_immune / Globals.eps);
             int egh_desired_depth = (int)depth_strech_param * kw_tree.get_depth();
+            int child_idx = 0;
+
+            Console.WriteLine("EGH");
+            Console.WriteLine("---");
+
+            // Expand the EGH tree to the target depth (egh_desired_depth) by zero padding the EGH tree.
+            // After that expantion, traverse the tree and change the nodes to their values after egh coding.
+            egh_tree.zero_padding(egh_desired_depth);
+
+            foreach (PartyNode egh_node in egh_tree)
+            {
+                Node sub_tree_root_kw = new PartyNode();
+                // List <Node> sub_formula_arr = new List<Node>();
+                if (egh_node.get_depth() < 2)
+                {
+                    /* The node's grandparent is the root itself,               */
+                    /* set the current node's error child as the root's subtree */
+                    //tmp_node_egh = egh_node;
+                    sub_tree_root_kw = egh_node.get_protocol_node_reference();
+                }
+                else
+                {
+                    /* Replace the current node last child with the current node's grandparent sub_tree */
+                    tmp_node_egh = (PartyNode)egh_node.get_parent(copy_flags.SHALLOW).get_parent(copy_flags.SHALLOW);
+                    sub_tree_root_kw = tmp_node_egh.get_protocol_node_reference();
+                }
+                if (sub_tree_root_kw.get_if_leaf()) continue;
+                // Replace the last child with it's corresponding sub_tree (deep copy) with the sub_tree_root_kw as a root
+                if ((egh_node.get_child(num_of_children_idx) != null) && (egh_node.get_child(num_of_children_idx).get_name() == "0") )
+                {
+                    ProtocolTree sub_tree_to_copy = new ProtocolTree((PartyNode)sub_tree_root_kw);
+                    sub_tree_to_copy.set_depth();
+
+                    // Verify that the new EGH tree depth is less than the egh_desired_depth 
+                    if (sub_tree_to_copy.get_depth() + egh_node.get_depth() < egh_desired_depth)
+                    {
+                        ProtocolTree cloned_sub_tree = new ProtocolTree(sub_tree_to_copy.deep_copy());
+                        cloned_sub_tree.set_depth( sub_tree_to_copy.get_depth() );
+                        child_idx = egh_node.get_last_child_idx() + 1;
+                        while ( (child_idx < egh_node.get_num_of_children() ) && (egh_node.get_child(child_idx).get_name() != "0"))
+                        {
+                            egh_node.inc_last_child_idx();
+                            child_idx = egh_node.get_last_child_idx();
+                        }
+                        egh_tree.copy_sub_tree((PartyNode)egh_node.get_child(child_idx), cloned_sub_tree);
+                        //foreach (PartyNode sub_node in cloned_sub_tree)
+                        ///////////////
+                        //egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
+                    }
+                }
+            }
+
+            TreeUtils.write_tree_to_file(egh_tree);
+            // Perform Zero padding
+            egh_tree.set_depth();
+            egh_tree.init_last_child_idx();
+            return egh_tree;
+#if bug_fix
+            // Deep copy the kw_tree in order to use it for reacability
+            ProtocolTree egh_tree = (ProtocolTree)kw_tree.deep_copy();
+            PartyNode tmp_node_egh = new PartyNode(); // TAL: changed from Node to PartyNode in order to use the method get_protocol_node_reference
+            int num_of_children = kw_tree.get_root().get_num_of_children();
+            int num_of_children_idx = num_of_children - 1;
+            double depth_strech_param = (Globals.egh_immune / Globals.eps);
+            int egh_desired_depth = (int)depth_strech_param * kw_tree.get_depth();
 
             Console.WriteLine("EGH");
             Console.WriteLine("---");
@@ -200,6 +265,7 @@ namespace FinalProject
             egh_tree.zero_padding(egh_desired_depth);
 
             return egh_tree;
+#endif
         }
 
         /* ProtocolTree::reverse_kw()
@@ -220,6 +286,9 @@ namespace FinalProject
         {
             PartyNode curr_node = null;
             int zero_leaves_counter = 0;
+            int num_of_children = egh_tree.get_root().get_num_of_children();
+            ProtocolTree subtree_root = new ProtocolTree((PartyNode)egh_tree.get_root().get_child(num_of_children - 1));
+            subtree_root.set_subtree_unreachable();
 
             // Set leaves array
             egh_tree.set_leaves_array();
@@ -262,16 +331,20 @@ namespace FinalProject
                 foreach (PartyNode node in leaves_array)
                 {
                     if (node.get_name() == "0") continue;
-                    List<int> real_path_to_node = node.get_real_egh_path();
-                    List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
-                    node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
+                    if ((node.get_reachable()) == reachable_type.NA)
+                    {
+                        List<int> real_path_to_node = node.get_real_egh_path();
+                        List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
+                        node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
+                    }
                 }
 
                 egh_tree.update_leaves_array();
 
             }
-            //return convert2FormulaTree()
-            return null; // TODO: change
+            TreeUtils.write_tree_to_file(egh_tree);
+            return egh_tree.convert2FormulaTree();
+            //return null; // TODO: change
         }
 
         /* ProtocolTree::zero_padding(int tree_depth_after_padding)
@@ -369,6 +442,7 @@ namespace FinalProject
             }
             ProtocolTree zero_sub_tree = new ProtocolTree(root_zero_tree);
             //TreeUtils.write_tree_to_file(zero_sub_tree);
+            this.init_last_child_idx();
             return zero_sub_tree;
         } // End of "create_zero_sub_tree"
 
@@ -395,11 +469,11 @@ namespace FinalProject
                 curr_parent = (PartyNode)node.get_parent();
                 if (prev_parent != curr_parent)
                 {
-                    if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
+                    /*if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
                         throw new System.ArgumentException("update_leaves_array: node {0} is UNREACHABLE?!", curr_parent.get_name().ToString());
                     if (curr_parent.get_name() == "0")
                         curr_parent.set_reachable(reachable_type.UNREACHABLE);
-                    if ((curr_parent.get_reachable()) == reachable_type.NA)
+                    if ((curr_parent.get_reachable()) == reachable_type.NA)*/
                         /* Node wasn't examine if it's reachable yet - Add it to list in order to check its reachability */
                         leave_array_cpy.Add(curr_parent);
 
@@ -428,7 +502,142 @@ namespace FinalProject
             m_leaves_array = leave_array_cpy;
         } // End of "copy_leaves_array_from_idx_to_end"
 
+        /* ProtocolTree::copy_sub_tree()
+         * This method copies sub_tree2copy to zero_sub_tree_root. The method iterates both trees at the same time.
+         * [INPUT]:
+         * zero_sub_tree_root = A tree with zeroes. after the method, this tree contains all sub_tree2copy content.
+         * sub_tree2copy      = Tree with content. We want to copy the content from it.
+         * [OUTPUT]:
+         * void               
+         **********************************************************************************************************/
+        public void copy_sub_tree(PartyNode zero_sub_tree_root, ProtocolTree sub_tree2copy) 
+        {
+           
+            PartyNode curr_parent_zero_sub_tree = new PartyNode();
+            curr_parent_zero_sub_tree = zero_sub_tree_root;
 
+            PartyNode curr_parent_sub_tree2copy = (PartyNode)sub_tree2copy.get_root();
+            int sub_tree_depth_after_copying = curr_parent_zero_sub_tree.get_depth() + sub_tree2copy.get_depth();
+
+            PartyNode tmp_node = new PartyNode();
+
+            // Build a zero sub tree in a specific depth (tree_depth_after_padding - start_depth).
+            // Preorder 
+            // Keep add children while the root hasn't finished to add children.
+            while (((curr_parent_zero_sub_tree == zero_sub_tree_root) && (zero_sub_tree_root.get_last_child_idx() < (m_num_of_children - 1))) || (curr_parent_zero_sub_tree != zero_sub_tree_root))
+            {
+                // Add children to an internal nodes (curr_node)
+                while ((curr_parent_zero_sub_tree.get_depth() <= sub_tree_depth_after_copying) && (curr_parent_zero_sub_tree.get_last_child_idx() < (m_num_of_children - 1)))
+                {
+                    if (!curr_parent_sub_tree2copy.get_is_copied())
+                    {
+                        curr_parent_zero_sub_tree.set_node(curr_parent_sub_tree2copy);
+                        curr_parent_sub_tree2copy.set_is_copied(true);
+                    }
+                    // curr_parent_zero_sub_tree.set_depth(curr_parent_zero_sub_tree.get_depth() + 1);
+                    // Add the new PartyNode as a child to curr_node
+
+                    tmp_node = (PartyNode)curr_parent_sub_tree2copy.get_child(curr_parent_sub_tree2copy.get_last_child_idx() + 1);
+                    curr_parent_sub_tree2copy.inc_last_child_idx();
+                    curr_parent_zero_sub_tree.inc_last_child_idx();
+                    if (tmp_node == null) break;
+                    
+                    curr_parent_sub_tree2copy = tmp_node;
+                    
+                    curr_parent_zero_sub_tree = (PartyNode)curr_parent_zero_sub_tree.get_child(curr_parent_zero_sub_tree.get_last_child_idx());
+                    
+                    
+                }
+                // If curr_node != root, move upstream
+                if (curr_parent_sub_tree2copy.get_parent() != null)
+                {
+                    curr_parent_zero_sub_tree = (PartyNode)curr_parent_zero_sub_tree.get_parent();
+                    curr_parent_sub_tree2copy = (PartyNode)curr_parent_sub_tree2copy.get_parent();
+                }
+                // If curr_node == root, move orizontally to the next child
+                else if (curr_parent_sub_tree2copy.get_last_child_idx() < m_num_of_children-1 )
+                {
+                    curr_parent_zero_sub_tree = (PartyNode)curr_parent_zero_sub_tree.get_child(curr_parent_zero_sub_tree.get_last_child_idx());
+                    curr_parent_sub_tree2copy = (PartyNode)curr_parent_sub_tree2copy.get_child(curr_parent_sub_tree2copy.get_last_child_idx());
+                }
+                else
+                {
+                    break;
+                }
+            }
+            //TreeUtils.write_tree_to_file(zero_sub_tree);
+            ProtocolTree p_tmp_sub_tree = new ProtocolTree(zero_sub_tree_root);
+            p_tmp_sub_tree.init_last_child_idx();
+            sub_tree2copy.init_is_copied();
+        } // End of "copy_sub_tree"
+
+        public FormulaTree convert2FormulaTree()
+        {
+            ProtocolTree p_tree = this;
+            LogicNode curr_parent_formula_tree = new LogicNode( p_tree.get_root() );
+            LogicNode f_tree_root = curr_parent_formula_tree;
+            PartyNode curr_parent_protocol_tree = (PartyNode)p_tree.get_root();
+            PartyNode p_tree_root = (PartyNode)p_tree.get_root();
+
+            PartyNode p_tmp_node = new PartyNode();
+            int tmp_last_child_idx = 0;
+            
+            // Preorder 
+            // Keep add children while the root hasn't finished to add children.
+            while (((curr_parent_protocol_tree == p_tree_root) && (p_tree_root.get_last_child_idx() < (m_num_of_children - 1))) || (curr_parent_protocol_tree != p_tree_root))
+            {
+                // Add children to an internal nodes (curr_node)
+                while (curr_parent_protocol_tree.get_last_child_idx() < (m_num_of_children - 1))
+                {
+                    curr_parent_protocol_tree.inc_last_child_idx();
+                    curr_parent_formula_tree.inc_last_child_idx();
+                    tmp_last_child_idx = curr_parent_protocol_tree.get_last_child_idx();
+                    p_tmp_node = (PartyNode)curr_parent_protocol_tree.get_child(tmp_last_child_idx);
+                    if (p_tmp_node == null) break;
+                    // Check if the node is reachable, if not -> don't add it to the formula tree
+                    if (p_tmp_node.get_reachable() == reachable_type.UNREACHABLE) continue;
+                    if (p_tmp_node.get_reachable() == reachable_type.NA)  throw new System.ArgumentException("Invalid reachble_type: NA");
+
+                    LogicNode logic_child_to_add = new LogicNode(p_tmp_node);
+                    curr_parent_formula_tree.add_child(logic_child_to_add, tmp_last_child_idx);
+
+                    // Update current nodes of Formula Tre and Protocol Tree
+                    curr_parent_formula_tree = logic_child_to_add;
+                    curr_parent_protocol_tree = p_tmp_node;
+                }
+                // If curr_node != root, move upstream
+                if (curr_parent_protocol_tree.get_parent() != null)
+                {
+                    curr_parent_protocol_tree = (PartyNode)curr_parent_protocol_tree.get_parent();
+                    curr_parent_formula_tree = (LogicNode)curr_parent_formula_tree.get_parent();
+                }
+                // If curr_node == root, move orizontally to the next child
+                else if (curr_parent_protocol_tree.get_last_child_idx() < m_num_of_children - 1)
+                {
+                    curr_parent_protocol_tree = (PartyNode)curr_parent_protocol_tree.get_child(curr_parent_protocol_tree.get_last_child_idx());
+                    curr_parent_formula_tree = (LogicNode)curr_parent_formula_tree.get_child(curr_parent_formula_tree.get_last_child_idx());
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+            FormulaTree resilient_formula_Tree = new FormulaTree(f_tree_root);
+            TreeUtils.write_tree_to_file(resilient_formula_Tree);
+            resilient_formula_Tree.init_last_child_idx();
+            p_tree.init_last_child_idx();
+
+            return resilient_formula_Tree;
+        } // End of "convert2FormulaTree"
+        
+        public void set_subtree_unreachable()
+        {
+            foreach ( PartyNode p_node in this )
+            {
+                p_node.set_reachable(reachable_type.UNREACHABLE);
+            }
+        }
     }
 }
 

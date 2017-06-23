@@ -42,9 +42,37 @@ namespace FinalProject
         public LogicNode(Node node)
             : base(node)
         {
-            m_value = INVALID_VALUE;
-            m_children = new LogicNode[m_num_of_children];
-        }
+
+            m_children = new LogicNode[m_num_of_children]; //in case that typeof = Node preform only this command
+            Type t = node.GetType();
+            if (t == typeof(FinalProject.LogicNode))
+            {
+                m_value = INVALID_VALUE;
+            }
+            else
+            {
+                if (t == typeof(FinalProject.PartyNode)) 
+                {
+                    if (node.get_type() == node_type.ALICE)
+                    {
+                        m_type = node_type.AND;
+                    }
+                    else if (node.get_type() == node_type.BOB)
+                    {
+                        m_type = node_type.OR;
+                    }
+                    else if ((node.get_type() == node_type.AND) || (node.get_type() == node_type.OR))
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        throw new System.ArgumentException("Invalid type for Node, suppose to be ALICE or BOB", node.get_type().ToString());
+                    }
+                }
+            }
+
+        } // End of "LogicNode(Node node)"
 
         // GETTERS
 

@@ -169,6 +169,19 @@ namespace FinalProject
         {
             m_zero_node_counter -= 2;
         }
+
+        public override void set_node(Node reference_node)
+        {
+            PartyNode p_reference_node = (PartyNode)reference_node;
+            base.set_node(reference_node);
+            m_sub_formula_tree = p_reference_node.get_sub_formula_tree_ptr(); 
+            m_protocol_node_reference = p_reference_node.get_protocol_node_reference();
+            m_is_zero_padding = p_reference_node.get_is_zero_padding();
+            error_vectors_list = p_reference_node.get_error_vectors_list();
+            m_zero_node_counter = p_reference_node.get_zero_node_counter();
+            m_reachable = p_reference_node.get_reachable();
+        }
+
         // METHODS 
 
         /* PartyNode::deep_copy()

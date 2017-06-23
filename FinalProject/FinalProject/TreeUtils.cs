@@ -87,6 +87,7 @@ namespace FinalProject
 
         public static void write_tree_to_file(Tree tree_2_print)
         {
+            PartyNode p_node = new PartyNode();
 
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_NAME_OUT))
             {
@@ -104,8 +105,14 @@ namespace FinalProject
                     {
                         s_node_type = "1";
                     }
-                    string line = node_name + s_node_type;
-                    fs.WriteLine(line);
+
+                    /*
+                    p_node = (PartyNode)node;
+                    if (p_node.get_reachable() == reachable_type.REACHABLE)
+                    {*/
+                        string line = node_name + s_node_type;
+                        fs.WriteLine(line);
+                    //}
                 }
             }
         } // End of function "write_tree_to_file"

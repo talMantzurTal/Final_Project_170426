@@ -102,21 +102,20 @@ namespace FinalProject
             // Deep copy and add to the tree all nodes axcept the root (which is already in it)
 
             foreach (Node node in this)
+            {
+                name = node.get_name();
+
+                Node[] children = node.get_children();
+                Node clone_curr_node = Tree.preOrder(cloned_root,name,true);
+                foreach (Node child in children)
                 {
-                    name = node.get_name();
-                    //if ( name ot.get_== m_ronode_name() ) continue;
-
-                    Node[] children = node.get_children();
-                    Node clone_curr_node = Tree.preOrder(cloned_root,name,true);
-                    foreach (Node child in children)
-                    {
-                        if (child == null) continue;
-                        Node tmp_child_node = child.deep_copy();
+                    if (child == null) continue;
+                    Node tmp_child_node = child.deep_copy();
         
-                        clone_curr_node.add_child(tmp_child_node);
-                    }
-
+                    clone_curr_node.add_child(tmp_child_node);
                 }
+
+            }
             Console.WriteLine("DEEP COPY:\n------------");
 
             foreach (Node node in cloned_tree)
@@ -131,8 +130,13 @@ namespace FinalProject
             return m_depth;
         }
 
-        public void set_depth()
+        public void set_depth(int depth_in = 0, bool flag_if_calc = true )
         {
+            if (!flag_if_calc)
+            {
+                m_depth = depth_in;
+                return;
+            }
             int max_depth = 0;
             foreach (Node node in this)
             {
@@ -141,6 +145,18 @@ namespace FinalProject
             }
             m_depth = max_depth ; // according number of edges
 
+        }
+
+        public void init_last_child_idx()
+        {
+            foreach ( Node node in this )
+                node.init_last_child_idx();
+        }
+
+        public void init_is_copied()
+        {
+            foreach (Node node in this)
+                node.init_is_copied();
         }
     }
 }
