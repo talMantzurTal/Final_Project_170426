@@ -37,10 +37,20 @@ namespace FinalProject
             FormulaTree formula_tree_input;
 
             formula_tree_input = TreeUtils.read_tree_from_file();
+            String input_string = "10001000";
+            List<int> error_vector = new List<int>();
+            for (int i = 0; i < 7; i++)
+                error_vector.Add(Globals.NO_ERROR);
+            formula_tree_input.calculate_formula(input_string, error_vector);
+
             ProtocolTree kw_tree = ProtocolTree.kw_trans(formula_tree_input);
             ProtocolTree egh_tree = ProtocolTree.egh(kw_tree);
 
             FormulaTree resilient_formula = ProtocolTree.reverse_kw(kw_tree, egh_tree);
+            //List<int> error_vector = new List<int>();
+            for (int i = 0; i < 55; i++)
+                error_vector.Add(Globals.NO_ERROR);
+            resilient_formula.calculate_formula(input_string, error_vector);
 
             return;
         }

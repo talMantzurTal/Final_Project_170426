@@ -20,10 +20,11 @@ namespace FinalProject
         protected int m_last_child_idx;
         public const int INVALID_VALUE = -1;
         protected bool m_is_copied;
+        protected int m_gate_idx;
 
         public Node()
         {
-            Console.WriteLine("Node default c'tor");
+            //Console.WriteLine("Node default c'tor");
             m_type = node_type.NA;
             m_depth = 0;
             m_num_of_children = 0;
@@ -34,12 +35,13 @@ namespace FinalProject
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visited at child[0], we increment m_last_child_idx 
             m_is_copied = false;
+            m_gate_idx = INVALID_VALUE;
 
         }
 
         public Node(string name, node_type type, int depth, int number_of_children, Node parent)
         {
-            Console.WriteLine("Node c'tor");
+            //Console.WriteLine("Node c'tor");
             m_type = type;
             m_depth = depth;
             m_num_of_children = number_of_children;
@@ -50,6 +52,7 @@ namespace FinalProject
             m_leaf_idx = INVALID_VALUE;
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
             m_is_copied = false;
+            m_gate_idx = INVALID_VALUE;
         }
 
         public Node(Node node)
@@ -60,10 +63,11 @@ namespace FinalProject
             m_parent = null; //vered change
             m_name = node.get_name();
             m_if_leaf = true;
-            m_leaf_idx = INVALID_VALUE;
+            m_leaf_idx = node.get_leaf_idx();
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
             m_children = null;
             m_is_copied = false;
+            m_gate_idx = INVALID_VALUE;
         }
 
 
@@ -72,13 +76,6 @@ namespace FinalProject
         {
             return m_name;
         }
-
-        /*public Node get_child(string child_name)
-        {
-            foreach ( Node node in mp_children )
-                if ((node != null) && (node.m_name == child_name)) return node;              
-            return null;
-        } */
 
         public int get_last_child_idx()
         {
@@ -142,6 +139,34 @@ namespace FinalProject
             return m_is_copied;
         }
 
+        public int get_gate_idx()
+        {
+            return m_gate_idx;
+        }
+
+        /* PartyNode::limit_num_of_errors()
+         * This method goes over all binary vectors which define errors (1 = error , 0= no error)
+         * and for each vector checks: if the number of errors (cells that contains 1)
+         * are bigger than error limit -> dispose this vector.
+         * 
+         * [INPUT]:
+         * optional_binary_vectors = list of all binary vector with size n (2^n vectors)
+         * 
+         * [OUTPUT]:
+         * limit_num_of_errors = list of legal error vectors - don't contain more than ERROR_FRACTION errors.
+         * ********************************************************************************************************************/
+        public List<int> get_path_from_root()
+        {
+            List<int> path = new List<int>();
+            Node curr_node = this;
+            while (curr_node.get_parent() != null)
+            {
+                path.Add(curr_node.my_idx_as_a_child());
+                curr_node = (Node)curr_node.get_parent();
+            }
+            path.Reverse();
+            return path;
+        } // End of "get_path_from_root"
 
         // SETTERS
         public void set_parent(Node parent)
@@ -179,6 +204,11 @@ namespace FinalProject
         public void set_is_copied(bool is_copied)
         {
             m_is_copied = is_copied;
+        }
+
+        public void set_gate_idx(int gate_idx)
+        {
+            m_gate_idx = gate_idx;
         }
 
         // METHODS
@@ -366,10 +396,10 @@ namespace FinalProject
          * [OUTPUT]:
          * An integer stores the calculated value for this
          * ******************************************************************************************** */
-        public virtual int calculate_value(int[] input_vector)
+       /* public virtual int calculate_value(int[] input_vector)
         {
             return 0;
-        } // End of method "calculate_value"
+        }*/ // End of method "calculate_value"
 
         /* Node::my_idx_as_a_child()
          * The method returns the index of the node in the m_children array of this.m_parent()

@@ -80,6 +80,7 @@ namespace FinalProject
                 }
                 fs.Close();
                 formula_tree.number_leaves();
+                formula_tree.number_gates_preorder();
             } // If file exists
             else throw new System.ArgumentException("read_tree_from_file: Text file {0} doesn't exist\n", FILE_NAME_IN);
             return formula_tree;
@@ -87,32 +88,49 @@ namespace FinalProject
 
         public static void write_tree_to_file(Tree tree_2_print)
         {
-            PartyNode p_node = new PartyNode();
+            Node tmp_node = new Node();
+           
 
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_NAME_OUT))
             {
 
                 string node_name;
-                string s_node_type = "";
+                string s_node_type = "", s_root_type = "";
+                List<int> path_from_root;
+                string line = "";
+                string root_name = tree_2_print.get_root().get_name();
+                if ((tree_2_print.get_root().get_type() == node_type.ALICE) || (tree_2_print.get_root().get_type() == node_type.AND))
+                {
+                    s_root_type = "0";
+                }
+                else if ((tree_2_print.get_root().get_type() == node_type.BOB) || (tree_2_print.get_root().get_type() == node_type.OR))
+                {
+                    s_root_type = "1";
+                }
+                string root_prefix = root_name + s_root_type;
+
                 foreach (Node node in tree_2_print)
                 {
-                    node_name = node.get_name();
-                    if ((node.get_type() == node_type.ALICE) || (node.get_type() == node_type.AND))
+                    path_from_root = node.get_path_from_root();
+                    line = root_prefix;
+                    tmp_node = tree_2_print.get_root();
+                    // Print all path from root to node
+                    for (int i = 0; i < path_from_root.Count; i++)
                     {
-                        s_node_type = "0";
+                        tmp_node = tmp_node.get_child(path_from_root[i]);
+                        node_name = tmp_node.get_name();
+                        if ((tmp_node.get_type() == node_type.ALICE) || (tmp_node.get_type() == node_type.AND))
+                        {
+                            s_node_type = "0";
+                        }
+                        else if ((tmp_node.get_type() == node_type.BOB) || (tmp_node.get_type() == node_type.OR))
+                        {
+                            s_node_type = "1";
+                        }
+                        line += node_name + s_node_type;
+                        
                     }
-                    else if ((node.get_type() == node_type.BOB) || (node.get_type() == node_type.OR))
-                    {
-                        s_node_type = "1";
-                    }
-
-                    /*
-                    p_node = (PartyNode)node;
-                    if (p_node.get_reachable() == reachable_type.REACHABLE)
-                    {*/
-                        string line = node_name + s_node_type;
-                        fs.WriteLine(line);
-                    //}
+                    fs.WriteLine(line);/////////////////
                 }
             }
         } // End of function "write_tree_to_file"

@@ -22,7 +22,7 @@ namespace FinalProject
         public PartyNode()
             : base()
         {
-            Console.WriteLine("PartyNode defult c'tor");
+            //Console.WriteLine("PartyNode defult c'tor");
             m_children = new PartyNode[m_num_of_children];
             for (int i = 0; i < m_num_of_children; i++)
             {
@@ -39,7 +39,7 @@ namespace FinalProject
         public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent = null, Node f_tree = null) :
             base(name, type, depth, number_of_children, parent)
         {
-            Console.WriteLine("PartyNode c'tor");
+            //Console.WriteLine("PartyNode c'tor");
             m_children = new PartyNode[m_num_of_children];
             m_is_zero_padding = false;
             for (int i = 0; i < m_num_of_children; i++)
@@ -272,29 +272,6 @@ namespace FinalProject
             }
         } // End of "generate_alphabeth_vectors"
 
-        /* PartyNode::limit_num_of_errors()
-         * This method goes over all binary vectors which define errors (1 = error , 0= no error)
-         * and for each vector checks: if the number of errors (cells that contains 1)
-         * are bigger than error limit -> dispose this vector.
-         * 
-         * [INPUT]:
-         * optional_binary_vectors = list of all binary vector with size n (2^n vectors)
-         * 
-         * [OUTPUT]:
-         * limit_num_of_errors = list of legal error vectors - don't contain more than ERROR_FRACTION errors.
-         * ********************************************************************************************************************/
-        public List<int> get_real_egh_path()
-        {
-            List<int> path = new List<int>();
-            PartyNode curr_node = this;
-            while( curr_node.get_parent() != null )
-            {
-                path.Add(curr_node.my_idx_as_a_child());
-                curr_node = (PartyNode)curr_node.get_parent();
-            }
-            path.Reverse();
-            return path;
-        } // End of "get_real_egh_path"
 
         /* PartyNode::limit_num_of_errors()
          * This method goes over all binary vectors which define errors (1 = error , 0= no error)

@@ -10,49 +10,31 @@ namespace FinalProject
 {
     class ProtocolTree : Tree
     {
-        // Data members:
-        List<PartyNode> m_leaves_array;
+        
 
         // C'TORS
         public ProtocolTree() :
             base()
         {
-            Console.WriteLine("ProtocolTree c'tor");
-            m_leaves_array = new List<PartyNode>();
+            //Console.WriteLine("ProtocolTree c'tor");
+            
         }
         public ProtocolTree(PartyNode root_node) :
             base((Node)root_node)
         {
-            Console.WriteLine("ProtocolTree c'tor");
-            m_leaves_array = new List<PartyNode>();
+            //Console.WriteLine("ProtocolTree c'tor");
         }
         public ProtocolTree(Tree tree) :
             base(tree)
         {
-            Console.WriteLine("ProtocolTree c'tor");
-            m_leaves_array = new List<PartyNode>();
+            //Console.WriteLine("ProtocolTree c'tor");
         }
 
         // GETTERS
-        PartyNode get_leaves_array_cell(int idx = 0)
-        {
-            return m_leaves_array[idx];
-        }
 
-        List<PartyNode> get_leaves_array()
-        {
-            return m_leaves_array;
-        }
+
         // SETTERS 
-        public void set_leaves_array()
-        {
-            foreach (PartyNode node in this)
-            {
 
-                if (node.get_if_leaf())
-                    m_leaves_array.Add((PartyNode)node);
-            }
-        }
 
         // METHODS:
         public Tree deep_copy()
@@ -87,12 +69,12 @@ namespace FinalProject
             if (f_root.get_type() == node_type.AND)
             {
                 root_type = node_type.ALICE;
-                Console.WriteLine("ALICE");
+                //Console.WriteLine("ALICE");
             }
             else
             {
                 root_type = node_type.BOB;
-                Console.WriteLine("BOB");
+                //Console.WriteLine("BOB");
             }
             int root_depth = f_root.get_depth();
             int root_num_of_children = f_root.get_num_of_children();
@@ -118,7 +100,7 @@ namespace FinalProject
                     Node parent_node = Tree.preOrder(p_root, n.get_parent().get_name(), true);
                     parent_node.add_child(p_tmp_node);
                 }
-                Console.WriteLine(n.get_name());
+                //Console.WriteLine(n.get_name());
 
                 foreach (var child in n.get_children().ToArray().Reverse())
                 {
@@ -156,8 +138,8 @@ namespace FinalProject
             int egh_desired_depth = (int)depth_strech_param * kw_tree.get_depth();
             int child_idx = 0;
 
-            Console.WriteLine("EGH");
-            Console.WriteLine("---");
+            //Console.WriteLine("EGH");
+            //Console.WriteLine("---");
 
             // Expand the EGH tree to the target depth (egh_desired_depth) by zero padding the EGH tree.
             // After that expantion, traverse the tree and change the nodes to their values after egh coding.
@@ -165,6 +147,7 @@ namespace FinalProject
 
             foreach (PartyNode egh_node in egh_tree)
             {
+                if ((egh_node.get_depth() * 2 - 2) > egh_desired_depth) continue;
                 Node sub_tree_root_kw = new PartyNode();
                 // List <Node> sub_formula_arr = new List<Node>();
                 if (egh_node.get_depth() < 2)
@@ -206,7 +189,7 @@ namespace FinalProject
                 }
             }
 
-            TreeUtils.write_tree_to_file(egh_tree);
+            //TreeUtils.write_tree_to_file(egh_tree);
             // Perform Zero padding
             egh_tree.set_depth();
             egh_tree.init_last_child_idx();
@@ -302,7 +285,7 @@ namespace FinalProject
                  * zero in order to check if it's reachable */
                 for (int idx = 0; idx < egh_tree.get_leaves_array().Count; idx++)
                 {
-                    curr_node = egh_tree.get_leaves_array_cell(idx);
+                    curr_node = (PartyNode)egh_tree.get_leaves_array_cell(idx);
                     if (curr_node.get_name() == "0")
                     {
                         curr_node.set_reachable(reachable_type.UNREACHABLE);
@@ -327,13 +310,15 @@ namespace FinalProject
                 // 1. Get it's path from root in egh_tree
                 // 2. Generate leagl error vectors from "error_binary_vectors"
                 // 3. Check if the node is reachable
-                List<PartyNode> leaves_array = egh_tree.get_leaves_array();
+                List<Node> leaves_array = egh_tree.get_leaves_array();
+                PartyNode tmp_p_node = new PartyNode();
                 foreach (PartyNode node in leaves_array)
                 {
-                    if (node.get_name() == "0") continue;
-                    if ((node.get_reachable()) == reachable_type.NA)
+                    tmp_p_node = (PartyNode)node;
+                    if (tmp_p_node.get_name() == "0") continue;
+                    if ((tmp_p_node.get_reachable()) == reachable_type.NA)
                     {
-                        List<int> real_path_to_node = node.get_real_egh_path();
+                        List<int> real_path_to_node = node.get_path_from_root();
                         List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
                         node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
                     }
@@ -342,8 +327,10 @@ namespace FinalProject
                 egh_tree.update_leaves_array();
 
             }
-            TreeUtils.write_tree_to_file(egh_tree);
-            return egh_tree.convert2FormulaTree();
+            //TreeUtils.write_tree_to_file(egh_tree);
+            FormulaTree resilient_formula = egh_tree.convert2FormulaTree();
+            resilient_formula.number_gates_preorder();
+            return resilient_formula;
             //return null; // TODO: change
         }
 
@@ -373,7 +360,7 @@ namespace FinalProject
                     }
                 }
             }
-            TreeUtils.write_tree_to_file(this);
+            //TreeUtils.write_tree_to_file(this);
         } // End of "zero_padding"
 
         /* ProtocolTree::create_zero_sub_tree()
@@ -446,45 +433,6 @@ namespace FinalProject
             return zero_sub_tree;
         } // End of "create_zero_sub_tree"
 
-        /* ProtocolTree::update_leaves_array()
-         * This method updates m_leaves_array. The method enters the nodes of a specific depth (parents of the current 
-         * m_leaves_array), only if their m_reachable is NA (hasn;t been assigned yet). The main target of the method 
-         * is the reachability method.
-         * [INPUT]:
-         * void
-         * [OUTPUT]:
-         * void               
-         **********************************************************************************************************/
-        void update_leaves_array()
-        {
-            PartyNode curr_parent = new PartyNode();
-            PartyNode prev_parent = new PartyNode();
-            List<PartyNode> leave_array_cpy = new List<PartyNode>();
-
-            // Iterate over all nodes in m_leave_array. Foreach node and add it's parent to m_leaves_array if it's an reachable_type.NA 
-            // reachble and not a zero leaf  
-            foreach (Node node in m_leaves_array)
-            {
-                if (node.get_parent() == null) continue;
-                curr_parent = (PartyNode)node.get_parent();
-                if (prev_parent != curr_parent)
-                {
-                    /*if ((curr_parent.get_reachable()) == reachable_type.UNREACHABLE)
-                        throw new System.ArgumentException("update_leaves_array: node {0} is UNREACHABLE?!", curr_parent.get_name().ToString());
-                    if (curr_parent.get_name() == "0")
-                        curr_parent.set_reachable(reachable_type.UNREACHABLE);
-                    if ((curr_parent.get_reachable()) == reachable_type.NA)*/
-                        /* Node wasn't examine if it's reachable yet - Add it to list in order to check its reachability */
-                        leave_array_cpy.Add(curr_parent);
-
-                    prev_parent = curr_parent;
-
-                }
-            }
-            // Note: in case that all nodes are reachable, m_leaves_array will be empty. 
-            m_leaves_array = leave_array_cpy;
-        } // End of "update_leaves_array"
-
         /* ProtocolTree::copy_leaves_array_from_idx()
          * This method copies m_leaves_array to itself starting an intput index to the end.
          * [INPUT]:
@@ -494,7 +442,7 @@ namespace FinalProject
          **********************************************************************************************************/
         void copy_leaves_array_from_idx_to_end(int start_idx = 0)
         {
-            List<PartyNode> leave_array_cpy = new List<PartyNode>();
+            List<Node> leave_array_cpy = new List<Node>();
             for (int idx = start_idx; idx < this.get_leaves_array().Count; idx++)
             {
                 leave_array_cpy.Add(m_leaves_array[idx]);

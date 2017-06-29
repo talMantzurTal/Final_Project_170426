@@ -10,33 +10,46 @@ namespace FinalProject
 {
     class Tree : IEnumerable
     {
+        // Data members:
         protected int m_depth;
         protected int m_num_of_children;
         protected Node m_root;
         public const int INVALID_VALUE = -1;
+        protected List<Node> m_leaves_array;
+        protected bool m_status_number_leaves;
+        protected bool m_status_number_gates;
 
         public Tree()
         {
-            Console.WriteLine("Tree c'tor");
+            //Console.WriteLine("Tree c'tor");
             m_root = null;
             m_depth = 0;
             m_num_of_children = 0;
+            m_leaves_array = new List<Node>();
+            m_status_number_leaves = false;
+            m_status_number_gates = false;
         }
 
         public Tree(Node root_node)
         {
-            Console.WriteLine("Tree c'tor");
+            //Console.WriteLine("Tree c'tor");
             m_root = root_node;
             m_depth = 0;
             m_num_of_children = root_node.get_num_of_children();
+            m_leaves_array = new List<Node>();
+            m_status_number_leaves = false;
+            m_status_number_gates = false;
         }
 
         public Tree(Tree tree)
         {
-            Console.WriteLine("Tree c'tor");
+            //Console.WriteLine("Tree c'tor");
             m_root = tree.get_root();
             m_depth = tree.get_depth();
             m_num_of_children = m_root.get_num_of_children();
+            m_leaves_array = new List<Node>();
+            m_status_number_leaves = false;
+            m_status_number_gates = false;
         }
 
         public Node get_root(copy_flags flag = copy_flags.SHALLOW)
@@ -157,6 +170,102 @@ namespace FinalProject
         {
             foreach (Node node in this)
                 node.init_is_copied();
+        }
+
+        public void set_leaves_array()
+        {
+            foreach (Node node in this)
+            {
+                if (node.get_if_leaf())
+                    m_leaves_array.Add(node);
+            }
+        }
+
+
+        /* Tree::update_leaves_array()
+         * This method updates m_leaves_array. The method enters the nodes of a specific depth (parents of the current 
+         * m_leaves_array), only if their m_reachable is NA (hasn;t been assigned yet). The main target of the method 
+         * is the reachability method.
+         * [INPUT]:
+         * void
+         * [OUTPUT]:
+         * void               
+         **********************************************************************************************************/
+        public void update_leaves_array()
+        {
+            Node curr_parent = new Node();
+            Node prev_parent = new Node();
+            List<Node> leave_array_cpy = new List<Node>();
+
+            // Iterate over all nodes in m_leave_array. Foreach node and add it's parent to m_leaves_array if it's an reachable_type.NA 
+            // reachble and not a zero leaf  
+            foreach (Node node in m_leaves_array)
+            {
+                if (node.get_parent() == null) continue;
+                curr_parent = node.get_parent();
+                if (prev_parent != curr_parent)
+                {
+                    leave_array_cpy.Add(curr_parent);
+                    prev_parent = curr_parent;
+                }
+            }
+            // Note: in case that all nodes are reachable, m_leaves_array will be empty. 
+            m_leaves_array = leave_array_cpy;
+        } // End of "update_leaves_array"
+
+        public Node get_leaves_array_cell(int idx = 0)
+        {
+            return m_leaves_array[idx];
+        }
+
+        public List<Node> get_leaves_array()
+        {
+            return m_leaves_array;
+        }
+
+        public void number_gates_preorder()
+        {
+            if (m_status_number_gates)
+            {
+                throw new System.ArgumentException("ERROR: Gates are already numbered");
+            }
+            m_status_number_gates = true;
+            int gate_counter = 0;
+            
+            foreach ( Node node in this )
+            {
+                if (node.get_if_leaf()) continue;
+                node.set_gate_idx(gate_counter);
+                gate_counter++;
+            }
+            Console.WriteLine("Gate counter == {0}", gate_counter);
+            Console.WriteLine();
+        }
+
+        /* FormulaTree::number_leaves()
+         * The method number the leaves in the formula tree (using enumerator implementation)
+         * IN: void
+         * OUT: void
+         * ********************************************************************************** */
+        public void number_leaves()
+        {
+            if (m_status_number_leaves)
+            {
+                throw new System.ArgumentException("ERROR: Leaves are already numbered");
+            }
+            m_status_number_leaves = true;
+            int leaf_count = 0;
+            foreach (Node node in this)
+            {
+
+                if (node.get_if_leaf())
+                {
+                    node.set_leaf_idx(leaf_count);
+                    leaf_count++;
+                }
+            }
+
+            return;
         }
     }
 }

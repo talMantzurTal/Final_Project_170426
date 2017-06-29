@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,13 +10,12 @@ namespace FinalProject
 {
     class FormulaTree : Tree
     {
-
         private int m_num_of_variables;
 
         public FormulaTree()
             : base()
         {
-            Console.WriteLine("FormulaTree defualt c'tor");
+            //Console.WriteLine("FormulaTree defualt c'tor");
             m_num_of_variables = 0;
             m_root = null;
             m_depth = 0;
@@ -27,7 +27,7 @@ namespace FinalProject
         public FormulaTree(LogicNode root_node) :
             base((Node)root_node)
         {
-            Console.WriteLine("FormulaTree c'tor");
+            //Console.WriteLine("FormulaTree c'tor");
             m_num_of_variables = 0;
             m_root = root_node;
             m_depth = 0;
@@ -55,75 +55,83 @@ namespace FinalProject
          * The method calculate the formula implemented as a FormulaTree with the input to the formula
          * IN: formula_input = the input to the formula that should be calculated
          * ******************************************************************************************** */
-        public void calculate_formula(string formula_input)
+        public bool calculate_formula(string formula_input_string, List<int> error_vector)
         {
-            return;
-        }
+            Boolean[] bits = new Boolean[formula_input_string.Length];
 
-        /* FormulaTree::number_leaves()
-         * The method number the leaves in the formula tree (using enumerator implementation)
-         * IN: void
-         * OUT: void
-         * ********************************************************************************** */
-        public void number_leaves()
-        {
-            int leaf_count = 0;
-            foreach (Node node in this)
+            for (int i = 0; i< formula_input_string.Length; i++)
             {
-
-                if (node.get_if_leaf())
-                {
-                    node.set_leaf_idx(leaf_count);
-                    leaf_count++;
-                }
+                // Fill bits with the boolean values of formula input:
+                // true for formula_input[i] == 1
+                // false for formula_input[i] == 0
+                bits[i] = (formula_input_string[i] == '1');
             }
 
-            return;
-        }
-#if number_leaves
-        public void number_leaves()
-        {
-            Node curr_node = new Node();
-            curr_node = m_root;
-            int leaf_idx = 0;
-            int curr_last_child_idx = curr_node.get_last_child_idx();
-            // Number the leaves while the parent isn't the root or it is the root but the program haven't checked all root's children yet
-            while ((curr_node.get_name() != m_root.get_name()) || ((curr_last_child_idx + 1) < m_num_of_children))
+            BitArray formula_input_bits = new BitArray(bits);
+            //List<Node> leave_array = new List<Node>;
+            this.set_leaves_array();
+            LogicNode tmp_l_node = new LogicNode();
+            LogicNode tmp_l_child_node = new LogicNode();
+            LogicNode tmp_l_node_2 = new LogicNode();
+            int idx = 0;
+
+            foreach ( Node node in m_leaves_array )
             {
-                curr_node.inc_last_child_idx();
-                curr_last_child_idx = curr_node.get_last_child_idx();
-                Node tmp_head = new Node();
-                tmp_head = curr_node.get_child(curr_last_child_idx);
-                tmp_head.inc_last_child_idx();
-                int tmp_last_child_idx = tmp_head.get_last_child_idx();
-                // If a node with depth 1 is a leaf, number it and don't try to get to it's children
-                if (tmp_head.get_child(0) == null)
+                tmp_l_node = (LogicNode)node;
+                tmp_l_node.set_value(formula_input_bits[tmp_l_node.get_leaf_idx()]);
+                //idx++;
+            }
+
+            node_type type;
+            Node[] node_children;
+            Boolean value;
+            while ( this.get_leaves_array().Count != 1 )
+            {
+                this.update_leaves_array();
+                foreach (Node node in m_leaves_array)
                 {
-                    tmp_head.set_leaf_idx(leaf_idx);
-                    leaf_idx++;
-                }
-                else
-                {
-                    while (tmp_last_child_idx < m_num_of_children)
+                    tmp_l_node = (LogicNode)node;
+                    type = tmp_l_node.get_type();
+                    //
+                    if (error_vector[tmp_l_node.get_gate_idx()] != Globals.NO_ERROR)
                     {
-                        // If the grandchild is null, the child is a leaf
-                        while (tmp_head.get_child(tmp_last_child_idx).get_child(0) != null)
-                        {
-                            tmp_head = tmp_head.get_child(tmp_last_child_idx);
-                        }
-                        // Reached a leaf ->  number it
-                        tmp_head.get_child(tmp_last_child_idx).set_leaf_idx(leaf_idx);
-                        leaf_idx++;
-                        tmp_head.inc_last_child_idx();
-                        tmp_last_child_idx = tmp_head.get_last_child_idx();
+                        // Check if current node has a child with idx = 2 (avoid null reference)
+                        tmp_l_node_2 = (LogicNode)tmp_l_node.get_child(error_vector[tmp_l_node.get_gate_idx()]);
+                        if (tmp_l_node_2 == null) return false; // the error_vector is illegal for current tree
+                        value = tmp_l_node_2.get_value();
                     }
+                    else // No error
+                    { 
+                        node_children = tmp_l_node.get_children();
+                        if (type == node_type.AND)
+                        {
+                            value = true;
+                            idx = 0;
+                            while ((idx < m_num_of_children) && (node_children[idx] != null))
+                            {
+                                tmp_l_child_node = (LogicNode)node_children[idx];
+                                value = value && tmp_l_child_node.get_value();
+                                idx++;
+                            }
+                        }
+                        else
+                        {
+                            value = false;
+                            idx = 0;
+                            while ((idx < m_num_of_children) && (node_children[idx] != null))
+                            {
+                                tmp_l_child_node = (LogicNode)node_children[idx];
+                                value = value || tmp_l_child_node.get_value();
+                                idx++;
+                            }
+                        }
+                    }
+                    // Set the value of current node
+                    tmp_l_node.set_value(value);
                 }
-                Console.WriteLine("node ({0})", curr_node.get_name());
-                curr_node = tmp_head.get_parent();
             }
-            m_num_of_variables = leaf_idx;
+            return true; // the error_vector is legal for current tree
         }
-#endif
 
         public Tree deep_copy() //vered!!!
         {

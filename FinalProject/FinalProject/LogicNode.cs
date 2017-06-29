@@ -10,33 +10,33 @@ namespace FinalProject
     class LogicNode : Node
     {
         // DATA MEMBERS
-        protected int m_value;
+        protected Boolean m_value;
 
         // C'TORS
         public LogicNode()
             : base()
         {
-            Console.WriteLine("LogicNode defult c'tor");
+            //Console.WriteLine("LogicNode defult c'tor");
             m_children = new LogicNode[m_num_of_children];
             for (int i = 0; i < m_num_of_children; i++)
             {
                 m_children[i] = null;
             }
             //m_literal_idx = 0;
-            m_value = INVALID_VALUE;
+            m_value = false;
         }
 
         public LogicNode(string name, node_type type, int depth, int number_of_children, LogicNode parent) :
             base(name, type, depth, number_of_children, parent)
         {
-            Console.WriteLine("LogicNode c'tor");
+            //Console.WriteLine("LogicNode c'tor");
             m_children = new LogicNode[m_num_of_children];
             for (int i = 0; i < m_num_of_children; i++)
             {
                 m_children[i] = null;
             }
             //m_literal_idx = 0;
-            m_value = INVALID_VALUE;
+            m_value = false;
         }
 
         public LogicNode(Node node)
@@ -47,7 +47,7 @@ namespace FinalProject
             Type t = node.GetType();
             if (t == typeof(FinalProject.LogicNode))
             {
-                m_value = INVALID_VALUE;
+                m_value = false;
             }
             else
             {
@@ -75,10 +75,16 @@ namespace FinalProject
         } // End of "LogicNode(Node node)"
 
         // GETTERS
-
+        public Boolean get_value()
+        {
+            return m_value;
+        }
 
         // SETTERS
-
+        public void set_value(Boolean bit_value)
+        {
+            m_value = bit_value;
+        }
 
         // METHODS
 
@@ -119,7 +125,7 @@ namespace FinalProject
          * [OUTPUT]:
          * An int value stores the output value of the formula.
          * ************************************************************************************************************ */
-        public override int calculate_value(int[] input_vector)
+        /*public int calculate_value(int[] input_vector)
         {
             // A recursive function
             // Stop condition - if the function gets to a literal, returns it's value according to the input vector
@@ -142,7 +148,7 @@ namespace FinalProject
             }
 
             return m_value;
-        } // End of method "calculate_value"
+        } */// End of method "calculate_value"
 
 
 
