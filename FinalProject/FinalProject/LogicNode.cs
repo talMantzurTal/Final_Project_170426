@@ -16,7 +16,6 @@ namespace FinalProject
         public LogicNode()
             : base()
         {
-            //Console.WriteLine("LogicNode defult c'tor");
             m_children = new LogicNode[m_num_of_children];
             for (int i = 0; i < m_num_of_children; i++)
             {
@@ -29,7 +28,6 @@ namespace FinalProject
         public LogicNode(string name, node_type type, int depth, int number_of_children, LogicNode parent) :
             base(name, type, depth, number_of_children, parent)
         {
-            //Console.WriteLine("LogicNode c'tor");
             m_children = new LogicNode[m_num_of_children];
             for (int i = 0; i < m_num_of_children; i++)
             {

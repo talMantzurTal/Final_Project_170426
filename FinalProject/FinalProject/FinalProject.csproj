@@ -56,6 +56,7 @@
     <Compile Include="Tree.cs" />
     <Compile Include="TreeEnum.cs" />
     <Compile Include="TreeUtils.cs" />
+    <Compile Include="Simulation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

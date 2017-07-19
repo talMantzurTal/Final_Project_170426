@@ -47,7 +47,6 @@ namespace FinalProject
                 {
                     type = node_type.OR;
                 }
-                Console.WriteLine("tree c'tor({0},{1},{2})", i_alphabeth_size, s_node_name, type);
 
                 // Initialize the root of the formula tree
                 Node tmp_node = new LogicNode(s_node_name, type, 0, i_alphabeth_size, null);
@@ -75,7 +74,7 @@ namespace FinalProject
                         logic_tmp_node = (LogicNode)logic_tmp_node.get_child(s_node_name.ToString());
                         if (logic_tmp_node == null)
                             formula_tree.add_child(s_node_name, type, logic_parent_node);
-                        Console.WriteLine("Node.create+add(name={0},type={1})", line[i], line[i + 1]);
+                        // Console.WriteLine("Node.create+add(name={0},type={1})", line[i], line[i + 1]);
                     }
                 }
                 fs.Close();

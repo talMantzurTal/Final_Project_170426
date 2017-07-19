@@ -34,7 +34,6 @@ namespace FinalProject
                 preorder_queue.Add(n);
 
                 // Do Action
-                Console.Write(n.get_name());
                 if (n.get_children() == null)
                 {
                     position++;

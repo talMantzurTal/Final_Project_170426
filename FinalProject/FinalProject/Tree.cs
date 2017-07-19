@@ -18,38 +18,47 @@ namespace FinalProject
         protected List<Node> m_leaves_array;
         protected bool m_status_number_leaves;
         protected bool m_status_number_gates;
+        public int m_number_of_int_nodes;
+        public Globals globals;
+        private int m_number_of_leaves;
 
         public Tree()
         {
-            //Console.WriteLine("Tree c'tor");
             m_root = null;
             m_depth = 0;
             m_num_of_children = 0;
             m_leaves_array = new List<Node>();
             m_status_number_leaves = false;
             m_status_number_gates = false;
+            globals = Globals.get_instance();
+            m_number_of_int_nodes = 0;
+            m_number_of_leaves = 0;
         }
 
         public Tree(Node root_node)
         {
-            //Console.WriteLine("Tree c'tor");
             m_root = root_node;
             m_depth = 0;
             m_num_of_children = root_node.get_num_of_children();
             m_leaves_array = new List<Node>();
             m_status_number_leaves = false;
             m_status_number_gates = false;
+            globals = Globals.get_instance();
+            m_number_of_int_nodes = 0;
+            m_number_of_leaves = 0;
         }
 
         public Tree(Tree tree)
         {
-            //Console.WriteLine("Tree c'tor");
             m_root = tree.get_root();
             m_depth = tree.get_depth();
             m_num_of_children = m_root.get_num_of_children();
             m_leaves_array = new List<Node>();
             m_status_number_leaves = false;
             m_status_number_gates = false;
+            globals = Globals.get_instance();
+            m_number_of_int_nodes = 0;
+            m_number_of_leaves = 0;
         }
 
         public Node get_root(copy_flags flag = copy_flags.SHALLOW)
@@ -59,9 +68,18 @@ namespace FinalProject
             return m_root.deep_copy();
         }
 
+        public int get_number_of_int_nodes()
+        {
+            return m_number_of_int_nodes;
+        }
+
+        public int get_number_of_leaves()
+        {
+            return m_number_of_leaves;
+        }
+
         public void set_initial_tree(int i_alphabeth_size, Node root_node)
         {
-            Console.WriteLine("Tree set_initial_tree");
             m_root = root_node;
             m_depth = 0;
             m_num_of_children = i_alphabeth_size;
@@ -80,7 +98,6 @@ namespace FinalProject
                     return n;
                 }
                 // Do Action
-                Console.Write(n.get_name());
                 foreach (var child in n.get_children().ToArray().Reverse())
                 {
                     if (child != null)
@@ -128,12 +145,6 @@ namespace FinalProject
                     clone_curr_node.add_child(tmp_child_node);
                 }
 
-            }
-            Console.WriteLine("DEEP COPY:\n------------");
-
-            foreach (Node node in cloned_tree)
-            {
-                Console.WriteLine(node.get_name());
             }
             return cloned_tree;
         }
@@ -238,8 +249,7 @@ namespace FinalProject
                 node.set_gate_idx(gate_counter);
                 gate_counter++;
             }
-            Console.WriteLine("Gate counter == {0}", gate_counter);
-            Console.WriteLine();
+            m_number_of_int_nodes = gate_counter;
         }
 
         /* FormulaTree::number_leaves()
@@ -264,7 +274,7 @@ namespace FinalProject
                     leaf_count++;
                 }
             }
-
+            m_number_of_leaves = leaf_count;
             return;
         }
     }

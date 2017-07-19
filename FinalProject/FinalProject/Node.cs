@@ -21,10 +21,10 @@ namespace FinalProject
         public const int INVALID_VALUE = -1;
         protected bool m_is_copied;
         protected int m_gate_idx;
+        public Globals globals;
 
         public Node()
         {
-            //Console.WriteLine("Node default c'tor");
             m_type = node_type.NA;
             m_depth = 0;
             m_num_of_children = 0;
@@ -36,12 +36,11 @@ namespace FinalProject
             m_last_child_idx = INVALID_VALUE; // If we visited at child[0], we increment m_last_child_idx 
             m_is_copied = false;
             m_gate_idx = INVALID_VALUE;
-
+            globals = Globals.get_instance();
         }
 
         public Node(string name, node_type type, int depth, int number_of_children, Node parent)
         {
-            //Console.WriteLine("Node c'tor");
             m_type = type;
             m_depth = depth;
             m_num_of_children = number_of_children;
@@ -53,6 +52,7 @@ namespace FinalProject
             m_last_child_idx = INVALID_VALUE; // If we visted at child[0], we increment m_last_child_idx 
             m_is_copied = false;
             m_gate_idx = INVALID_VALUE;
+            globals = Globals.get_instance();
         }
 
         public Node(Node node)
@@ -68,6 +68,7 @@ namespace FinalProject
             m_children = null;
             m_is_copied = false;
             m_gate_idx = INVALID_VALUE;
+            globals = Globals.get_instance();
         }
 
 

@@ -10,13 +10,11 @@ namespace FinalProject
 {
     class FormulaTree : Tree
     {
-        private int m_num_of_variables;
+        
 
         public FormulaTree()
             : base()
         {
-            //Console.WriteLine("FormulaTree defualt c'tor");
-            m_num_of_variables = 0;
             m_root = null;
             m_depth = 0;
             m_num_of_children = 0;
@@ -27,8 +25,7 @@ namespace FinalProject
         public FormulaTree(LogicNode root_node) :
             base((Node)root_node)
         {
-            //Console.WriteLine("FormulaTree c'tor");
-            m_num_of_variables = 0;
+            //m_number_of_leaves = 0;
             m_root = root_node;
             m_depth = 0;
             m_num_of_children = root_node.get_num_of_children();
@@ -55,16 +52,18 @@ namespace FinalProject
          * The method calculate the formula implemented as a FormulaTree with the input to the formula
          * IN: formula_input = the input to the formula that should be calculated
          * ******************************************************************************************** */
-        public bool calculate_formula(string formula_input_string, List<int> error_vector)
+        public bool calculate_formula(int[] formula_input, int[] error_vector, bool flag_error = false /* for f = false and for F = true*/ )
         {
-            Boolean[] bits = new Boolean[formula_input_string.Length];
+            Boolean[] bits = new Boolean[formula_input.Length];
 
-            for (int i = 0; i< formula_input_string.Length; i++)
+            for (int i = 0; i< formula_input.Length; i++)
             {
                 // Fill bits with the boolean values of formula input:
                 // true for formula_input[i] == 1
                 // false for formula_input[i] == 0
-                bits[i] = (formula_input_string[i] == '1');
+                // --------------------------------------------------
+                // bits[i] = (formula_input_string[i] == '1');
+                bits[i] = (formula_input[i] == 1);
             }
 
             BitArray formula_input_bits = new BitArray(bits);
@@ -93,7 +92,7 @@ namespace FinalProject
                     tmp_l_node = (LogicNode)node;
                     type = tmp_l_node.get_type();
                     //
-                    if (error_vector[tmp_l_node.get_gate_idx()] != Globals.NO_ERROR)
+                    if ( (flag_error) && (error_vector[tmp_l_node.get_gate_idx()] != globals.NO_ERROR) )
                     {
                         // Check if current node has a child with idx = 2 (avoid null reference)
                         tmp_l_node_2 = (LogicNode)tmp_l_node.get_child(error_vector[tmp_l_node.get_gate_idx()]);
@@ -142,50 +141,5 @@ namespace FinalProject
             return (this.deep_copy(/*cloned_formula_root,*/cloned_formula_tree));
         }
 
-#if v
-            Node curr_node = new Node();
-            curr_node = m_root;
-            int leaf_idx = 0;
-            int curr_last_child_idx = curr_node.get_last_child_idx();
-            // Number the leaves while the parent isn't the root or it is the root but the program haven't checked all root's children yet
-            while ((curr_node.get_name() != m_root.get_name()) || ((curr_last_child_idx + 1) < m_num_of_children))
-            {
-                curr_node.inc_last_child_idx();
-                curr_last_child_idx = curr_node.get_last_child_idx();
-                Node tmp_head = new Node();
-                tmp_head = curr_node.get_child(curr_last_child_idx);
-                tmp_head.inc_last_child_idx();
-                int tmp_last_child_idx = tmp_head.get_last_child_idx();
-                // If a node with depth 1 is a leaf, number it and don't try to get to it's children
-                if (tmp_head.get_child(0) == null)
-                {
-                    tmp_head.set_leaf_idx(leaf_idx);
-                    leaf_idx++;
-                }
-                else
-                {
-                    while (tmp_last_child_idx < m_num_of_children)
-                    {
-                        // If the grandchild is null, the child is a leaf
-                        while (tmp_head.get_child(tmp_last_child_idx).get_child(0) != null)
-                        {
-                            tmp_head = tmp_head.get_child(tmp_last_child_idx);
-                        }
-                        // Reached a leaf ->  number it
-                        tmp_head.get_child(tmp_last_child_idx).set_leaf_idx(leaf_idx);
-                        leaf_idx++;
-                        tmp_head.inc_last_child_idx();
-                        tmp_last_child_idx = tmp_head.get_last_child_idx();
-                    }
-                }
-                curr_node = tmp_head.get_parent();
-            }
-            m_num_of_variables = leaf_idx;
-        }
-
-
-    }
-}
-#endif
     }
 }

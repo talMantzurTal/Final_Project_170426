@@ -13,7 +13,7 @@ namespace FinalProject
         private Node m_sub_formula_tree;
         private PartyNode m_protocol_node_reference; // used for egh transformation
         private bool m_is_zero_padding;
-        public List<int[]> error_vectors_list;
+        //public List<int[]> error_vectors_list; TAL
         private int m_zero_node_counter;
         private reachable_type m_reachable;
 
@@ -22,7 +22,6 @@ namespace FinalProject
         public PartyNode()
             : base()
         {
-            //Console.WriteLine("PartyNode defult c'tor");
             m_children = new PartyNode[m_num_of_children];
             for (int i = 0; i < m_num_of_children; i++)
             {
@@ -32,14 +31,13 @@ namespace FinalProject
             // m_sub_formula_tree = new FormulaTree(m_num_of_children,null);
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
-            error_vectors_list = new List<int[]>();
+            // TAL error_vectors_list = new List<int[]>();
             m_zero_node_counter = 0;
         }
 
         public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent = null, Node f_tree = null) :
             base(name, type, depth, number_of_children, parent)
         {
-            //Console.WriteLine("PartyNode c'tor");
             m_children = new PartyNode[m_num_of_children];
             m_is_zero_padding = false;
             for (int i = 0; i < m_num_of_children; i++)
@@ -51,14 +49,14 @@ namespace FinalProject
             m_sub_formula_tree = f_tree;
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
-            error_vectors_list = new List<int[]>();
+            // TAL error_vectors_list = new List<int[]>();
             m_zero_node_counter = 0;
         }
 
         public PartyNode(Node node)
             : base(node)
         {
-            error_vectors_list = new List<int[]>();
+            // TAL error_vectors_list = new List<int[]>();
             // m_sub_formula_tree = node;
             Type t = node.GetType();
             if (t == typeof(FinalProject.LogicNode))
@@ -116,10 +114,10 @@ namespace FinalProject
             return m_is_zero_padding;
         }
 
-        public List<int[]> get_error_vectors_list()
+       /* TAL public List<int[]> get_error_vectors_list()
         {
             return error_vectors_list;
-        }
+        }*/
 
         public reachable_type get_reachable()
         {
@@ -177,7 +175,7 @@ namespace FinalProject
             m_sub_formula_tree = p_reference_node.get_sub_formula_tree_ptr(); 
             m_protocol_node_reference = p_reference_node.get_protocol_node_reference();
             m_is_zero_padding = p_reference_node.get_is_zero_padding();
-            error_vectors_list = p_reference_node.get_error_vectors_list();
+            //error_vectors_list = p_reference_node.get_error_vectors_list();
             m_zero_node_counter = p_reference_node.get_zero_node_counter();
             m_reachable = p_reference_node.get_reachable();
         }
@@ -200,48 +198,7 @@ namespace FinalProject
         }
 
 
-#if change
-        public List<int[]> generate_error_vectors(Node node)
-        {
-            PartyNode parent = (PartyNode)this.get_parent();
-            PartyNode cur_node = (PartyNode)node;
-            int[] generic_error_array = new int[node.get_depth()];
-
-            int my_idx_as_a_child = INVALID_VALUE;
-            int ERROR = m_num_of_children - 1; // The index of the error child. Used to generate a generic error vector.
-            int node_depth = node.get_depth();
-            int num_of_errors = 0;
-
-            // iterate over all nodes in path from node to root
-            for (int cur_node_depth = node_depth; cur_node_depth>0; cur_node_depth--)
-            {
-                my_idx_as_a_child = cur_node.my_idx_as_a_child();
-
-                // Store a generic value for the error vactor: error/no error
-                if (my_idx_as_a_child != ERROR)
-                    generic_error_array[cur_node_depth] = Globals.NO_ERROR;
-                else
-                {
-                    generic_error_array[cur_node_depth] = ERROR;
-                    num_of_errors++;
-                }
-            }
-
-            // Generate vector
-            
-            int[] error_vector_to_generate = new int[num_of_errors];
-            //List<int[]> error_vectors_list = new List<int[]>();
-            int num_of_error_vectors = (int)Math.Pow(m_num_of_children + 1, node.get_depth());
-            int error_vector_length = node.get_depth();
-            int[][] error_vectors_list = new int[num_of_error_vectors][];
-            for (int i = 0; i < num_of_error_vectors; i++)
-                error_vectors_list[i] = new int[error_vector_length];
-            generate_alphabeth_vectors(error_vector_to_generate, 0, num_of_errors, error_vectors_list);
-
-            return null;
-        }
-
-#endif
+#if tal
         /* PartyNode::generate_alphabeth_vectors()
          * The recursive method generates all vectors with a d-ary alphabeth in size of a specific size. 
          * The vectors store in a data member of type List<int[]> 
@@ -274,7 +231,7 @@ namespace FinalProject
 
 
         /* PartyNode::limit_num_of_errors()
-         * This method goes over all binary vectors which define errors (1 = error , 0= no error)
+         * This method goes over all binary vectors which define errors (1 = error , 0 = no error)
          * and for each vector checks: if the number of errors (cells that contains 1)
          * are bigger than error limit -> dispose this vector.
          * 
@@ -288,7 +245,7 @@ namespace FinalProject
         {
             int vector_sum = 0;
             int N = optional_binary_vectors[0].Length;
-            int max_num_of_errors = (int)(N * Globals.error_fraction);
+            int max_num_of_errors = (int)(N * globals.error_fraction);
             bool flag_illegal_error = false;
 
             List<int[]> binary_vectors_to_return = new List<int[]>();
@@ -307,7 +264,7 @@ namespace FinalProject
                     }
                     if (error_vector[cell_idx] == 0)
                         // (cells == 0) --> indicates that there is no error
-                        error_vector[cell_idx] = Globals.NO_ERROR;
+                        error_vector[cell_idx] = globals.NO_ERROR;
                 }
                 if (flag_illegal_error == false)
                     binary_vectors_to_return.Add(error_vector);
@@ -339,9 +296,9 @@ namespace FinalProject
                 int[] tmp_legal_error_vector = new int[error_vector_length];
                 for (int cell_idx = 0; cell_idx < error_vector_length; cell_idx++)
                 {
-                    if (error_vector[cell_idx] == (int)Globals.NO_ERROR)
+                    if (error_vector[cell_idx] == (int)globals.NO_ERROR)
                     {
-                        tmp_legal_error_vector[cell_idx] = Globals.NO_ERROR;
+                        tmp_legal_error_vector[cell_idx] = globals.NO_ERROR;
                     }
                     else // ERROR
                     {
@@ -354,6 +311,8 @@ namespace FinalProject
 
             return error_vectors_per_node;
         } // End of "generate_leagel_vectors"
+
+#endif
 
         /* PartyNode::is_reachable()
          * This method check if a specified node is reachable.
@@ -398,7 +357,7 @@ namespace FinalProject
                     {
                         if ( error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1) )
                             curr_node.dec_zero_node_counter();
-                        else if ( error_vector[iterate_idx] == Globals.NO_ERROR )
+                        else if ( error_vector[iterate_idx] == globals.NO_ERROR )
                             curr_node.inc_zero_node_counter();
                         else if ( ( error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && ( error_vector[iterate_idx] >= 0 ) )
                             curr_node.inc_zero_node_counter();
@@ -414,7 +373,7 @@ namespace FinalProject
                                 curr_node = (PartyNode)curr_node.get_parent().get_parent();
                         }
                         // If there was no error -> go by the original intention: follow the egh_path
-                        else if (error_vector[iterate_idx] == Globals.NO_ERROR)
+                        else if (error_vector[iterate_idx] == globals.NO_ERROR)
                         {
                             // If in the egh_tree the next step is child #2 => reverse to grandparent only if the depth >= 2
                             if ( egh_path_to_node[iterate_idx] == (curr_node.get_num_of_children() - 1) )
@@ -454,12 +413,12 @@ namespace FinalProject
              *      if ( curr_node.is_leaf() )
              *      {
              *          error_vector[i] = m_num_children - 1 => curr_node.cpunter -= 2;
-             *          error_vector[i] = Globals.NO_ERROR => curr_node.cpunter += 1;
+             *          error_vector[i] = globals.NO_ERROR => curr_node.cpunter += 1;
              *          0 <= error_vector[i] < m_num_children - 1  => curr_node.cpunter += 1;
              *      }
              *      else
              *          error_vector[i] = m_num_children - 1 => return to the grand parent. if depth < 2 => don't move.
-             *          error_vector[i] = Globals.NO_ERROR => go the m_children[ egh_path_to_node[i] ].
+             *          error_vector[i] = globals.NO_ERROR => go the m_children[ egh_path_to_node[i] ].
              *          0 <= error_vector[i] < m_num_children - 1 , m_children[ error_vector[i] ].
              *          else, throw
              *          

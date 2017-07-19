@@ -5,29 +5,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace FinalProject
 {
     class ProtocolTree : Tree
     {
-        
+        Globals globals = Globals.get_instance();
 
         // C'TORS
         public ProtocolTree() :
             base()
         {
-            //Console.WriteLine("ProtocolTree c'tor");
             
         }
         public ProtocolTree(PartyNode root_node) :
             base((Node)root_node)
         {
-            //Console.WriteLine("ProtocolTree c'tor");
+
         }
         public ProtocolTree(Tree tree) :
             base(tree)
         {
-            //Console.WriteLine("ProtocolTree c'tor");
+
         }
 
         // GETTERS
@@ -69,12 +67,10 @@ namespace FinalProject
             if (f_root.get_type() == node_type.AND)
             {
                 root_type = node_type.ALICE;
-                //Console.WriteLine("ALICE");
             }
             else
             {
                 root_type = node_type.BOB;
-                //Console.WriteLine("BOB");
             }
             int root_depth = f_root.get_depth();
             int root_num_of_children = f_root.get_num_of_children();
@@ -100,7 +96,6 @@ namespace FinalProject
                     Node parent_node = Tree.preOrder(p_root, n.get_parent().get_name(), true);
                     parent_node.add_child(p_tmp_node);
                 }
-                //Console.WriteLine(n.get_name());
 
                 foreach (var child in n.get_children().ToArray().Reverse())
                 {
@@ -134,12 +129,10 @@ namespace FinalProject
             PartyNode tmp_node_egh = new PartyNode(); // TAL: changed from Node to PartyNode in order to use the method get_protocol_node_reference
             int num_of_children = kw_tree.get_root().get_num_of_children();
             int num_of_children_idx = num_of_children - 1;
-            double depth_strech_param = (Globals.egh_immune / Globals.eps);
+            double depth_strech_param = (egh_tree.globals.egh_immune / egh_tree.globals.eps);
             int egh_desired_depth = (int)depth_strech_param * kw_tree.get_depth();
             int child_idx = 0;
-
-            //Console.WriteLine("EGH");
-            //Console.WriteLine("---");
+            
 
             // Expand the EGH tree to the target depth (egh_desired_depth) by zero padding the EGH tree.
             // After that expantion, traverse the tree and change the nodes to their values after egh coding.
@@ -194,61 +187,7 @@ namespace FinalProject
             egh_tree.set_depth();
             egh_tree.init_last_child_idx();
             return egh_tree;
-#if bug_fix
-            // Deep copy the kw_tree in order to use it for reacability
-            ProtocolTree egh_tree = (ProtocolTree)kw_tree.deep_copy();
-            PartyNode tmp_node_egh = new PartyNode(); // TAL: changed from Node to PartyNode in order to use the method get_protocol_node_reference
-            int num_of_children = kw_tree.get_root().get_num_of_children();
-            int num_of_children_idx = num_of_children - 1;
-            double depth_strech_param = (Globals.egh_immune / Globals.eps);
-            int egh_desired_depth = (int)depth_strech_param * kw_tree.get_depth();
 
-            Console.WriteLine("EGH");
-            Console.WriteLine("---");
-
-            foreach (PartyNode egh_node in egh_tree)
-            {
-                Node sub_tree_root_kw = new PartyNode();
-                // List <Node> sub_formula_arr = new List<Node>();
-                if (egh_node.get_depth() < 2)
-                {
-                    /* The node's grandparent is the root itself,               */
-                    /* set the current node's error child as the root's subtree */
-                    //tmp_node_egh = egh_node;
-                    sub_tree_root_kw = egh_node.get_protocol_node_reference();
-
-                }
-                else
-                {
-                    /* Replace the current node last child with the current node's grandparent sub_tree */
-                    tmp_node_egh = (PartyNode)egh_node.get_parent(copy_flags.SHALLOW).get_parent(copy_flags.SHALLOW);
-                    sub_tree_root_kw = tmp_node_egh.get_protocol_node_reference();
-
-                }
-
-                // Replace the last child with it's corresponding sub_tree (deep copy) with the sub_tree_root_kw as a root
-                if (egh_node.get_child(num_of_children_idx) == null)
-                {
-                    ProtocolTree sub_tree_to_copy = new ProtocolTree((PartyNode)sub_tree_root_kw);
-                    sub_tree_to_copy.set_depth();
-
-                    // Verify that the new EGH tree depth is less than the egh_desired_depth 
-                    if (sub_tree_to_copy.get_depth() + egh_node.get_depth() < egh_desired_depth)
-                    {
-                        ProtocolTree cloned_sub_tree = new ProtocolTree(sub_tree_to_copy.deep_copy());
-                        //egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
-                        egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
-                    }
-                }
-            }
-
-            // TreeUtils.write_tree_to_file(egh_tree);
-            // Perform Zero padding
-            egh_tree.set_depth();
-            egh_tree.zero_padding(egh_desired_depth);
-
-            return egh_tree;
-#endif
         }
 
         /* ProtocolTree::reverse_kw()
@@ -268,6 +207,7 @@ namespace FinalProject
         public static FormulaTree reverse_kw(ProtocolTree kw_tree, ProtocolTree egh_tree)
         {
             PartyNode curr_node = null;
+            PartyNode curr_reachable_node = null;
             int zero_leaves_counter = 0;
             int num_of_children = egh_tree.get_root().get_num_of_children();
             ProtocolTree subtree_root = new ProtocolTree((PartyNode)egh_tree.get_root().get_child(num_of_children - 1));
@@ -283,6 +223,7 @@ namespace FinalProject
                 zero_leaves_counter = 0;
                 /* set zero nodes as UNREACHABLE and look for the first node in leaves array which isn't 
                  * zero in order to check if it's reachable */
+                
                 for (int idx = 0; idx < egh_tree.get_leaves_array().Count; idx++)
                 {
                     curr_node = (PartyNode)egh_tree.get_leaves_array_cell(idx);
@@ -297,14 +238,17 @@ namespace FinalProject
                 if (zero_leaves_counter == egh_tree.get_leaves_array().Count - 1)
                 {
                     egh_tree.update_leaves_array();
+                    curr_node = (PartyNode)egh_tree.get_leaves_array_cell(0);
                     continue;
                 }
                 // Generate error binary vectors with size curr_node.depth() and limit the legal vectors by the desired 
                 // error fraction
                 int[] error_vector_to_generate = new int[curr_node.get_depth()];
-                curr_node.generate_alphabeth_vectors(error_vector_to_generate, 0, error_vector_to_generate.Length, 2);
-                List<int[]> error_binary_vectors = curr_node.get_error_vectors_list();
-                error_binary_vectors = curr_node.limit_num_of_errors(error_binary_vectors);
+                // TAL curr_node.generate_alphabeth_vectors(error_vector_to_generate, 0, error_vector_to_generate.Length, 2);
+                kw_tree.globals.clear_error_vector_list();
+                kw_tree.globals.generate_alphabeth_vectors(error_vector_to_generate, 0, error_vector_to_generate.Length, 2);
+                List<int[]> error_binary_vectors = kw_tree.globals.get_error_vectors_list();
+                error_binary_vectors = kw_tree.globals.limit_num_of_errors(error_binary_vectors, kw_tree.globals.error_fraction);
 
                 // Foreach node in m_leaves_array:
                 // 1. Get it's path from root in egh_tree
@@ -319,13 +263,13 @@ namespace FinalProject
                     if ((tmp_p_node.get_reachable()) == reachable_type.NA)
                     {
                         List<int> real_path_to_node = node.get_path_from_root();
-                        List<int[]> legal_vectors_per_node = node.generate_legel_vectors(error_binary_vectors, real_path_to_node);
+                        List<int[]> legal_vectors_per_node = kw_tree.globals.generate_legel_vectors(error_binary_vectors, real_path_to_node);
                         node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
                     }
                 }
 
                 egh_tree.update_leaves_array();
-
+                curr_node = (PartyNode)egh_tree.get_leaves_array_cell(0);
             }
             //TreeUtils.write_tree_to_file(egh_tree);
             FormulaTree resilient_formula = egh_tree.convert2FormulaTree();
