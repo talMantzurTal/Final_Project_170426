@@ -47,21 +47,38 @@ namespace FinalProject
 
             List<int[]> input_vectors = new List<int[]>();
             List<int[]> error_vectors = new List<int[]>();
-            simulation.simulate(resilient_formula.get_number_of_int_nodes(), formula_tree_input.get_number_of_leaves(), input_vectors, error_vectors);
+            simulation.simulate(resilient_formula.get_number_of_int_nodes(), formula_tree_input.get_number_of_leaves(), ref input_vectors, ref error_vectors);
 
             bool f_output, F_output;
+            string msg1 = "", msg2 = "";
+            string symbol;
             string[] pass_fail_msg = { "Pass", "Fail" };
             int pass_fail_idx = 0;
-            foreach (int[] error_vector in error_vectors)
+            using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
             {
                 f_output = formula_tree_input.calculate_formula(input_vectors[0], null);
-                F_output = resilient_formula.calculate_formula(input_vectors[0], error_vector, true);
-                
-                    // print
-                using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
+                for (int i = 0; i < input_vectors[0].Length; i++)
+                    msg1 += input_vectors[0][i].ToString();
+                fs.WriteLine("Input vector = {0}", /*input_vectors[0].ToString()*/msg1);
+                foreach (int[] error_vector in error_vectors)
                 {
+                    F_output = resilient_formula.calculate_formula(input_vectors[0], error_vector, true);
+
+                    // print
+                    
+                    for (int i = 0; i < error_vector.Length; i++)
+                    {
+                        symbol = error_vector[i].ToString();
+                        if (symbol == "-2")
+                            symbol = "*";
+                        msg2 += symbol;
+                    }
+
                     if (f_output != F_output) pass_fail_idx = 1;
-                    fs.WriteLine("{0}    {1}    {2}    {3}    {4}", input_vectors[0], error_vector, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                    //fs.WriteLine("{0}    {1}    {2}    {3}    {4}", /*input_vectors[0].ToString()*/msg1, msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                    fs.WriteLine("{0}    {1}    {2}    {3}", msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                    msg1 = "";
+                    msg2 = "";
                 }
                 
             }

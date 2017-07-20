@@ -1,8 +1,0 @@
-2
-a1
-a1b0
-a1b0d1
-a1b0e1
-a1c0
-a1c0f1
-a1c0g1

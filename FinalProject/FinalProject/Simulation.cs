@@ -26,7 +26,7 @@ namespace FinalProject
             globals = Globals.get_instance();
         }
 
-        public void simulate(int number_of_gates, int number_of_literals, List<int[]> input_vectors, List<int[]> error_vectors)
+        public void simulate(int number_of_gates, int number_of_literals, ref List<int[]> input_vectors, ref List<int[]> error_vectors)
         {
             // 1. Black box - main in program
 
@@ -57,6 +57,7 @@ namespace FinalProject
             input_vectors.Add(input_vector);
 
             // 3. Generate error vectors for F
+            globals.clear_error_vector_list();
             int[] error_vector = new int[number_of_gates];
             globals.generate_alphabeth_vectors(error_vector, 0, error_vector.Length, 3);
             error_vectors = globals.get_error_vectors_list();

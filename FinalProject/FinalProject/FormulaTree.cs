@@ -96,7 +96,11 @@ namespace FinalProject
                     {
                         // Check if current node has a child with idx = 2 (avoid null reference)
                         tmp_l_node_2 = (LogicNode)tmp_l_node.get_child(error_vector[tmp_l_node.get_gate_idx()]);
-                        if (tmp_l_node_2 == null) return false; // the error_vector is illegal for current tree
+                        if (tmp_l_node_2 == null)
+                        {
+                            m_leaves_array.Clear();
+                            return false; // the error_vector is illegal for current tree
+                        }
                         value = tmp_l_node_2.get_value();
                     }
                     else // No error
@@ -129,6 +133,7 @@ namespace FinalProject
                     tmp_l_node.set_value(value);
                 }
             }
+            m_leaves_array.Clear();
             return true; // the error_vector is legal for current tree
         }
 

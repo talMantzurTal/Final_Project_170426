@@ -1,0 +1,16 @@
+2
+a1
+a1b0
+a1b0d1
+a1b0d1h0
+a1b0d1i1
+a1b0e1
+a1b0e1j0
+a1b0e1k0
+a1c0
+a1c0f1
+a1c0f1l0
+a1c0f1m0
+a1c0g1
+a1c0g1n0
+a1c0g1o0
