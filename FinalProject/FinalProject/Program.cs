@@ -39,6 +39,8 @@ namespace FinalProject
 
         static void Main(string[] args)
         {
+            TreeUtils.set_tree_names(10);
+
             Simulation simulation = Simulation.get_instance();
             simulation.ui_input_parameters();
             
@@ -54,6 +56,33 @@ namespace FinalProject
             string symbol;
             string[] pass_fail_msg = { "Pass", "Fail" };
             int pass_fail_idx = 0;
+
+            using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
+            {
+                foreach (int[] input_vector in input_vectors)
+                {
+                    f_output = formula_tree_input.calculate_formula(input_vector, null);
+                    
+                    F_output = resilient_formula.calculate_formula(input_vector, null, false);
+
+                    // print
+
+                    for (int i = 0; i < input_vector.Length; i++)
+                    {
+                        symbol = input_vector[i].ToString();
+                        if (symbol == "-2")
+                            symbol = "*";
+                        msg2 += symbol;
+                    }
+
+                    if (f_output != F_output) pass_fail_idx = 1;
+                    //fs.WriteLine("{0}    {1}    {2}    {3}    {4}", /*input_vectors[0].ToString()*/msg1, msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                    fs.WriteLine("{0}    {1}    {2}    {3}", msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                    msg1 = "";
+                    msg2 = "";
+                }
+            }
+#if r
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
             {
                 f_output = formula_tree_input.calculate_formula(input_vectors[0], null);
@@ -82,7 +111,8 @@ namespace FinalProject
                 }
                 
             }
-            return;
+#endif
+                return;
         }
         static void main_black_box(ref FormulaTree formula_tree_input, ref FormulaTree resilient_formula)
         {
@@ -232,7 +262,7 @@ namespace FinalProject
             for (int i = 0; i < alphabeth_size; i++)
             {
                 error_vector[last_cell_in] = i;
-                generate_alphabeth_vectors(error_vector, last_cell_in + 1, vector_size);
+                generate_alphabeth_vectors(error_vector, last_cell_in + 1, vector_size, alphabeth_size);
 
             }
         } // End of "generate_alphabeth_vectors"
@@ -291,29 +321,32 @@ namespace FinalProject
          * 
          * [OUTPUT]:
          * error_vectors_per_node = List of error vectors which suitable to a specified node. each one of 
-         * those vectors defines a path from root to node including some errors. (contain all egal options).
+         * those vectors defines a path from the root to node including some errors. (contain all egal options).
          * ********************************************************************************************************************/
-        public List<int[]> generate_legel_vectors(List<int[]> legal_error_vectors, List<int> real_egh_path)
+        public List<int[]> generate_legel_vectors(List<int[]> legal_error_vectors, List<int[]> real_egh_path)
         {
             List<int[]> error_vectors_per_node = new List<int[]>();
             int error_vector_length = legal_error_vectors[0].Length;
 
-            foreach (int[] error_vector in legal_error_vectors)
+            foreach (int[] curr_path in real_egh_path)
             {
-                int[] tmp_legal_error_vector = new int[error_vector_length];
-                for (int cell_idx = 0; cell_idx < error_vector_length; cell_idx++)
+                foreach (int[] error_vector in legal_error_vectors)
                 {
-                    if (error_vector[cell_idx] == (int)globals.NO_ERROR)
+                    int[] tmp_legal_error_vector = new int[error_vector_length];
+                    for (int cell_idx = 0; cell_idx < error_vector_length; cell_idx++)
                     {
-                        tmp_legal_error_vector[cell_idx] = globals.NO_ERROR;
-                    }
-                    else // ERROR
-                    {
-                        tmp_legal_error_vector[cell_idx] = real_egh_path[cell_idx];
-                    }
+                        if (error_vector[cell_idx] == (int)globals.NO_ERROR)
+                        {
+                            tmp_legal_error_vector[cell_idx] = globals.NO_ERROR;
+                        }
+                        else // ERROR
+                        {
+                            tmp_legal_error_vector[cell_idx] = curr_path[cell_idx];
+                        }
 
+                    }
+                    error_vectors_per_node.Add(tmp_legal_error_vector);
                 }
-                error_vectors_per_node.Add(tmp_legal_error_vector);
             }
 
             return error_vectors_per_node;

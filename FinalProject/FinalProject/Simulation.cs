@@ -48,21 +48,39 @@ namespace FinalProject
                 input_vectors.Add(copied_vector);
             }
             ******************************************************************************/
-            Random rnd = new Random();
+            globals.clear_error_vector_list();
             int[] input_vector = new int[number_of_literals];
-            for (int i = 0; i< number_of_literals; i++)
-            {
-                input_vector[i] = rnd.Next(0, 2); // Random number 0 or 1
-            }
-            input_vectors.Add(input_vector);
+            globals.generate_alphabeth_vectors(input_vector, 0, input_vector.Length, 2);
+            input_vectors = globals.get_error_vectors_list();
+            // random_vectors(1, number_of_literals, 1, ref input_vectors);
 
             // 3. Generate error vectors for F
-            globals.clear_error_vector_list();
+            //globals.clear_error_vector_list();
+#if t
             int[] error_vector = new int[number_of_gates];
-            globals.generate_alphabeth_vectors(error_vector, 0, error_vector.Length, 3);
-            error_vectors = globals.get_error_vectors_list();
-            error_vectors = globals.limit_num_of_errors(error_vectors, globals.delta);
-
+            //globals.generate_alphabeth_vectors(error_vector, 0, error_vector.Length, 3);
+            //error_vectors = globals.get_error_vectors_list();
+            List<int[]> randomized_path = new List<int[]>();
+            random_vectors(5, number_of_gates, 2, ref randomized_path);
+            
+            while (error_vectors.Count == 0)
+            {
+                //random_vectors(5, number_of_gates, 1, ref error_vectors);
+                for (int num_of_vectors = 0; num_of_vectors < number_of_gates; num_of_vectors++)
+                {
+                    int[] vector = new int[number_of_gates];
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (i % 8 == 0)
+                            vector[i * 8] = 1;
+                        else vector[i * 8] = 0;
+                    }
+                    error_vectors.Add(vector);
+                }
+                error_vectors = globals.limit_num_of_errors(error_vectors, globals.delta);
+            }
+            error_vectors = globals.generate_legel_vectors(error_vectors, randomized_path);
+#endif
             // 4. Calculate formula trees: f, F
 
             // 5. Compare f_output, F_output and print results to a file
@@ -91,6 +109,21 @@ namespace FinalProject
             if (!flag_instance)
                 ui = new Simulation();
             return ui;
+        }
+
+        public void random_vectors(int num_of_vectors, int vector_length, int max_value, ref List<int[]> randomized_vectors_out)
+        {
+            Random rnd = new Random();
+            int[] input_vector = new int[vector_length];
+
+            while (randomized_vectors_out.Count /* count starts from 1*/ <= num_of_vectors)
+            {
+                for (int i = 0; i < vector_length; i++)
+                {
+                    input_vector[i] = rnd.Next(0, max_value+1); // Random number from 0 to max_value
+                }
+                randomized_vectors_out.Add(input_vector);
+            }
         }
 
     }

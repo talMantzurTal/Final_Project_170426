@@ -1,4 +1,0 @@
-Input vector = 1010
-*****    True    True    Pass
-****1    True    True    Pass
-***1*    True    True    Pass

@@ -211,6 +211,11 @@ namespace FinalProject
         {
             m_gate_idx = gate_idx;
         }
+        
+        public void set_name(string name)
+        {
+            m_name = name;
+        }
 
         // METHODS
         // --------

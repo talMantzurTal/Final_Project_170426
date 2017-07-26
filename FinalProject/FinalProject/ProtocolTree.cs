@@ -206,6 +206,7 @@ namespace FinalProject
          **********************************************************************************************************/
         public static FormulaTree reverse_kw(ProtocolTree kw_tree, ProtocolTree egh_tree)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             PartyNode curr_node = null;
             PartyNode curr_reachable_node = null;
             int zero_leaves_counter = 0;
@@ -262,9 +263,10 @@ namespace FinalProject
                     if (tmp_p_node.get_name() == "0") continue;
                     if ((tmp_p_node.get_reachable()) == reachable_type.NA)
                     {
-                        List<int> real_path_to_node = node.get_path_from_root();
+                        List<int[]> real_path_to_node = new List<int[]>();
+                        real_path_to_node.Add(node.get_path_from_root().ToArray());
                         List<int[]> legal_vectors_per_node = kw_tree.globals.generate_legel_vectors(error_binary_vectors, real_path_to_node);
-                        node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node);
+                        node.is_reachable(kw_tree, legal_vectors_per_node, real_path_to_node[0]);
                     }
                 }
 
@@ -274,6 +276,8 @@ namespace FinalProject
             //TreeUtils.write_tree_to_file(egh_tree);
             FormulaTree resilient_formula = egh_tree.convert2FormulaTree();
             resilient_formula.number_gates_preorder();
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
             return resilient_formula;
             //return null; // TODO: change
         }
@@ -317,7 +321,7 @@ namespace FinalProject
          * [OUTPUT]:
          * Tree of zeroes. Each node in the tree has a type of ALICE/BOB in an alternating order.                  
          **********************************************************************************************************/
-        Tree create_zero_sub_tree(int tree_depth_after_padding, node_type type_parent = node_type.BOB, int start_depth = 0)
+        public Tree create_zero_sub_tree(int tree_depth_after_padding, node_type type_parent = node_type.BOB, int start_depth = 0)
         {
             string name = "0";
             node_type type;

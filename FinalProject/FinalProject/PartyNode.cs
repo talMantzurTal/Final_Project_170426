@@ -340,7 +340,7 @@ namespace FinalProject
          * [OUTPUT]:
          * None
          * ********************************************************************************************************************/
-        public void is_reachable(ProtocolTree kw_tree, List<int[]> error_vectors_per_node, List<int> egh_path_to_node)
+        public void is_reachable(ProtocolTree kw_tree, List<int[]> error_vectors_per_node, int[] egh_path_to_node)
         {
             this.set_reachable(reachable_type.UNREACHABLE);
             int iterate_idx = 0;
