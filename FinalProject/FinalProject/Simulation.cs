@@ -26,7 +26,7 @@ namespace FinalProject
             globals = Globals.get_instance();
         }
 
-        public void simulate(int number_of_gates, int number_of_literals, ref List<int[]> input_vectors, ref List<int[]> error_vectors)
+        public void simulate(/*int number_of_gates,*/ int number_of_literals, ref List<int[]> input_vectors/*, ref List<int[]> error_vectors*/)
         {
             // 1. Black box - main in program
 
@@ -48,10 +48,19 @@ namespace FinalProject
                 input_vectors.Add(copied_vector);
             }
             ******************************************************************************/
+            int tree_depth = (int)Math.Log(number_of_literals, 2);
             globals.clear_error_vector_list();
             int[] input_vector = new int[number_of_literals];
-            globals.generate_alphabeth_vectors(input_vector, 0, input_vector.Length, 2, 20, true);
-            input_vectors = globals.get_error_vectors_list();
+            if (tree_depth <= 4)
+            {
+                
+                globals.generate_alphabeth_vectors(input_vector, 0, input_vector.Length, 2);
+                input_vectors = globals.get_error_vectors_list();
+            }
+            else
+                globals.random_vectors(20, number_of_literals, 2, ref input_vectors);
+
+            
             // random_vectors(1, number_of_literals, 1, ref input_vectors);
 
             // 3. Generate error vectors for F
@@ -111,20 +120,7 @@ namespace FinalProject
             return ui;
         }
 
-        public void random_vectors(int num_of_vectors, int vector_length, int max_value, ref List<int[]> randomized_vectors_out)
-        {
-            Random rnd = new Random();
-            int[] input_vector = new int[vector_length];
-
-            while (randomized_vectors_out.Count /* count starts from 1*/ <= num_of_vectors)
-            {
-                for (int i = 0; i < vector_length; i++)
-                {
-                    input_vector[i] = rnd.Next(0, max_value+1); // Random number from 0 to max_value
-                }
-                randomized_vectors_out.Add(input_vector);
-            }
+       
+   
         }
-
-    }
 }

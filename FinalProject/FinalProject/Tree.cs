@@ -78,6 +78,11 @@ namespace FinalProject
             return m_number_of_leaves;
         }
 
+        public int get_num_of_children()
+        {
+            return m_num_of_children;
+        }
+
         public void set_initial_tree(int i_alphabeth_size, Node root_node)
         {
             m_root = root_node;

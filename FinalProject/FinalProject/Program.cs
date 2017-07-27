@@ -34,13 +34,14 @@ namespace FinalProject
     class Program
     {
 #if PRINT_F
-        const string FILE_PATH = @"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\simulation_results.txt";
+        const string FILE_PATH = @"C:\Users\vered\Documents\GitHub\Final_Project_170426\simulation_results.txt";
 #endif
 
         static void Main(string[] args)
         {
-            //TreeUtils.set_tree_names(7);
-
+            TreeUtils.set_tree_names(10);
+            Globals globals;
+            globals = Globals.get_instance();
             Simulation simulation = Simulation.get_instance();
             simulation.ui_input_parameters();
             
@@ -49,8 +50,8 @@ namespace FinalProject
 
             List<int[]> input_vectors = new List<int[]>();
             List<int[]> error_vectors = new List<int[]>();
-            simulation.simulate(resilient_formula.get_number_of_int_nodes(), formula_tree_input.get_number_of_leaves(), ref input_vectors, ref error_vectors);
-
+            simulation.simulate(/*resilient_formula.get_number_of_int_nodes(),*/ formula_tree_input.get_number_of_leaves(), ref input_vectors/*, ref error_vectors*/);
+            generate_err_vectors(resilient_formula,ref error_vectors, 1, resilient_formula.get_number_of_int_nodes(), globals.delta);
             bool f_output, F_output;
             string msg1 = "", msg2 = "";
             string symbol;
@@ -59,35 +60,49 @@ namespace FinalProject
 
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
             {
-                foreach (int[] input_vector in input_vectors)
+
+                 foreach (int[] err_vector in error_vectors)
                 {
-                    f_output = formula_tree_input.calculate_formula(input_vector, null);
-
-                    F_output = resilient_formula.calculate_formula(input_vector, null, false);
-
-                    // print
-
-                    for (int i = 0; i < input_vector.Length; i++)
+                    for (int i = 0; i < err_vector.Length; i++)
                     {
-                        symbol = input_vector[i].ToString();
+                        symbol = err_vector[i].ToString();
                         if (symbol == "-2")
                             symbol = "*";
-                        msg2 += symbol;
+                        msg1 += symbol;
                     }
-
-                    if (f_output != F_output)
+                    fs.WriteLine("Error Vector = {0}", msg1);
+                    foreach (int[] input_vector in input_vectors)
                     {
-                        pass_fail_idx = 1;
-                        faild_counter++;
+                        f_output = formula_tree_input.calculate_formula(input_vector, null);
+
+                        F_output = resilient_formula.calculate_formula(input_vector, err_vector, true);
+
+                        // print
+
+                        for (int i = 0; i < input_vector.Length; i++)
+                        {
+                            symbol = input_vector[i].ToString();
+                            if (symbol == "-2")
+                                symbol = "*";
+                            msg2 += symbol;
+                        }
+
+                        if (f_output != F_output)
+                        {
+                            pass_fail_idx = 1;
+                            faild_counter++;
+                        }
+                        else pass_fail_idx = 0;
+                        //fs.WriteLine("{0}    {1}    {2}    {3}    {4}", /*input_vectors[0].ToString()*/msg1, msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                        fs.WriteLine("{0}    {1}    {2}    {3}", msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                        msg1 = "";
+                        msg2 = "";
                     }
-                    else pass_fail_idx = 0;
-                    //fs.WriteLine("{0}    {1}    {2}    {3}    {4}", /*input_vectors[0].ToString()*/msg1, msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
-                    fs.WriteLine("{0}    {1}    {2}    {3}", msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
-                    msg1 = "";
-                    msg2 = "";
+                    
                 }
-                fs.WriteLine("{0} failed out of {1}", faild_counter, input_vectors.Count.ToString());
-            }
+                fs.WriteLine("{0} failed out of {1}", faild_counter, ((input_vectors.Count)*(error_vectors.Count)).ToString());
+                    }
+                    
 #if r
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
             {
@@ -118,7 +133,7 @@ namespace FinalProject
                 
             }
 #endif
-            return;
+                return;
         }
         static void main_black_box(ref FormulaTree formula_tree_input, ref FormulaTree resilient_formula)
         {
@@ -127,25 +142,46 @@ namespace FinalProject
             ProtocolTree kw_tree = ProtocolTree.kw_trans(formula_tree_input);
             ProtocolTree egh_tree = ProtocolTree.egh(kw_tree);
             resilient_formula = ProtocolTree.reverse_kw(kw_tree, egh_tree);
-            kw_tree = null;
-            egh_tree = null;
 
-
-            /*
-            String input_string = "10001000";
-            List<int> error_vector = new List<int>();
-            for (int i = 0; i < 7; i++)
-                error_vector.Add(globals.NO_ERROR);
-            formula_tree_input.calculate_formula(input_string, error_vector);
-            */
-
-            //List<int> error_vector = new List<int>();
-            /*
-            for (int i = 0; i < 55; i++)
-                error_vector.Add(globals.NO_ERROR);
-            resilient_formula.calculate_formula(input_string, error_vector);*/
         }
+        public static void generate_err_vectors(FormulaTree resilient_formula, ref List<int[]> error_vectors, int num_of_vectors, int number_of_gates, double delta)
+        {
+            Globals globals;
+            globals = Globals.get_instance();
+            Node tmp_node = new Node();
+            int total_err_per_path = 0, couter_err_per_path = 0;
+            int alphabet_size = resilient_formula.get_num_of_children();
+            globals.random_vectors(num_of_vectors, number_of_gates, 3, ref error_vectors);
+            resilient_formula.set_leaves_array();
+            List<Node> leaves_array = resilient_formula.get_leaves_array();
+            foreach (int[] err_vector in error_vectors)
+            {
+                foreach (Node leaf in leaves_array)
+                {
+                    total_err_per_path = (int)(leaf.get_depth() * delta);
+                    couter_err_per_path = 0;
+                    tmp_node = leaf;
+                    while (tmp_node.get_parent() != null)
+                    {
+                        tmp_node = tmp_node.get_parent();
+                        if ((err_vector[tmp_node.get_gate_idx()] != globals.NO_ERROR) && (err_vector[tmp_node.get_gate_idx()] != alphabet_size))
+                        {
+                            if (couter_err_per_path < total_err_per_path)
+                                couter_err_per_path++;
+                            else
+                                err_vector[tmp_node.get_gate_idx()] = globals.NO_ERROR;
+                        }
+                        else if ((err_vector[tmp_node.get_gate_idx()] == alphabet_size))
+                        {
+                            err_vector[tmp_node.get_gate_idx()] = globals.NO_ERROR;
+                        }
+                    }
+                }
+                
+            }
+             
 
+        }
     }
     
     public class Globals
@@ -258,10 +294,10 @@ namespace FinalProject
         * [OUTPUT]:
         * void
         * ******************************************************************************************************************* */
-        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size, int alphabeth_size = 2, int number_of_vectors = 20, bool flag_limit_list = false)
+        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size, int alphabeth_size = 2)
         {
             // Stop condition
-            if (((flag_limit_list) && (error_vectors_list.Count > number_of_vectors)) || (last_cell_in == (vector_size)) )
+            if (last_cell_in == (vector_size))
             {
                 int[] tmp_vector = (int[])error_vector.Clone();
                 error_vectors_list.Add(tmp_vector);
@@ -271,7 +307,7 @@ namespace FinalProject
             for (int i = 0; i < alphabeth_size; i++)
             {
                 error_vector[last_cell_in] = i;
-                generate_alphabeth_vectors(error_vector, last_cell_in + 1, vector_size, alphabeth_size, number_of_vectors, flag_limit_list);
+                generate_alphabeth_vectors(error_vector, last_cell_in + 1, vector_size, alphabeth_size);
 
             }
         } // End of "generate_alphabeth_vectors"
@@ -360,5 +396,20 @@ namespace FinalProject
 
             return error_vectors_per_node;
         } // End of "generate_leagel_vectors"
+
+        public void random_vectors(int num_of_vectors, int vector_length, int max_value, ref List<int[]> randomized_vectors_out)
+        {
+            Random rnd = new Random();
+            int[] input_vector = new int[vector_length];
+
+            while (randomized_vectors_out.Count /* count starts from 1*/ <= num_of_vectors)
+            {
+                for (int i = 0; i < vector_length; i++)
+                {
+                    input_vector[i] = rnd.Next(0, max_value + 1); // Random number from 0 to max_value
+                }
+                randomized_vectors_out.Add(input_vector);
+            }
+        }
     }
 }

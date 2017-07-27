@@ -10,7 +10,7 @@ namespace FinalProject
 {
     class FormulaTree : Tree
     {
-        
+
 
         public FormulaTree()
             : base()
@@ -56,7 +56,7 @@ namespace FinalProject
         {
             Boolean[] bits = new Boolean[formula_input.Length];
 
-            for (int i = 0; i< formula_input.Length; i++)
+            for (int i = 0; i < formula_input.Length; i++)
             {
                 // Fill bits with the boolean values of formula input:
                 // true for formula_input[i] == 1
@@ -74,7 +74,7 @@ namespace FinalProject
             LogicNode tmp_l_node_2 = new LogicNode();
             int idx = 0;
 
-            foreach ( Node node in m_leaves_array )
+            foreach (Node node in m_leaves_array)
             {
                 tmp_l_node = (LogicNode)node;
                 tmp_l_node.set_value(formula_input_bits[tmp_l_node.get_leaf_idx()]);
@@ -84,7 +84,7 @@ namespace FinalProject
             node_type type;
             Node[] node_children;
             Boolean value;
-            while ( this.get_leaves_array().Count != 1 )
+            while (this.get_leaves_array().Count != 1)
             {
                 this.update_leaves_array();
                 foreach (Node node in m_leaves_array)
@@ -92,13 +92,13 @@ namespace FinalProject
                     tmp_l_node = (LogicNode)node;
                     type = tmp_l_node.get_type();
                     //
-                    if ( tmp_l_node.get_if_leaf() )
+                    if (tmp_l_node.get_if_leaf())
                     {
                         tmp_l_node.set_value(bits[tmp_l_node.get_leaf_idx()]);
                         continue;
                     }
 
-                    if ( (flag_error) && (error_vector[tmp_l_node.get_gate_idx()] != globals.NO_ERROR) )
+                    if ((flag_error) && (error_vector[tmp_l_node.get_gate_idx()] != globals.NO_ERROR))
                     {
                         // Check if current node has a child with idx = 2 (avoid null reference)
                         tmp_l_node_2 = (LogicNode)tmp_l_node.get_child(error_vector[tmp_l_node.get_gate_idx()]);
@@ -110,7 +110,7 @@ namespace FinalProject
                         value = tmp_l_node_2.get_value();
                     }
                     else // No error
-                    { 
+                    {
                         node_children = tmp_l_node.get_children();
                         if (type == node_type.AND)
                         {
