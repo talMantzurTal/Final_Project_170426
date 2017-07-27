@@ -92,6 +92,12 @@ namespace FinalProject
                     tmp_l_node = (LogicNode)node;
                     type = tmp_l_node.get_type();
                     //
+                    if ( tmp_l_node.get_if_leaf() )
+                    {
+                        tmp_l_node.set_value(bits[tmp_l_node.get_leaf_idx()]);
+                        continue;
+                    }
+
                     if ( (flag_error) && (error_vector[tmp_l_node.get_gate_idx()] != globals.NO_ERROR) )
                     {
                         // Check if current node has a child with idx = 2 (avoid null reference)
@@ -134,7 +140,7 @@ namespace FinalProject
                 }
             }
             m_leaves_array.Clear();
-            return true; // the error_vector is legal for current tree
+            return (tmp_l_node.get_value()); // the error_vector is legal for current tree
         }
 
         public Tree deep_copy() //vered!!!

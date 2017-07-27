@@ -39,7 +39,7 @@ namespace FinalProject
 
         static void Main(string[] args)
         {
-            TreeUtils.set_tree_names(10);
+            //TreeUtils.set_tree_names(7);
 
             Simulation simulation = Simulation.get_instance();
             simulation.ui_input_parameters();
@@ -55,14 +55,14 @@ namespace FinalProject
             string msg1 = "", msg2 = "";
             string symbol;
             string[] pass_fail_msg = { "Pass", "Fail" };
-            int pass_fail_idx = 0;
+            int pass_fail_idx = 0, faild_counter = 0;
 
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
             {
                 foreach (int[] input_vector in input_vectors)
                 {
                     f_output = formula_tree_input.calculate_formula(input_vector, null);
-                    
+
                     F_output = resilient_formula.calculate_formula(input_vector, null, false);
 
                     // print
@@ -75,12 +75,18 @@ namespace FinalProject
                         msg2 += symbol;
                     }
 
-                    if (f_output != F_output) pass_fail_idx = 1;
+                    if (f_output != F_output)
+                    {
+                        pass_fail_idx = 1;
+                        faild_counter++;
+                    }
+                    else pass_fail_idx = 0;
                     //fs.WriteLine("{0}    {1}    {2}    {3}    {4}", /*input_vectors[0].ToString()*/msg1, msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
                     fs.WriteLine("{0}    {1}    {2}    {3}", msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
                     msg1 = "";
                     msg2 = "";
                 }
+                fs.WriteLine("{0} failed out of {1}", faild_counter, input_vectors.Count.ToString());
             }
 #if r
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
@@ -112,7 +118,7 @@ namespace FinalProject
                 
             }
 #endif
-                return;
+            return;
         }
         static void main_black_box(ref FormulaTree formula_tree_input, ref FormulaTree resilient_formula)
         {
@@ -121,6 +127,9 @@ namespace FinalProject
             ProtocolTree kw_tree = ProtocolTree.kw_trans(formula_tree_input);
             ProtocolTree egh_tree = ProtocolTree.egh(kw_tree);
             resilient_formula = ProtocolTree.reverse_kw(kw_tree, egh_tree);
+            kw_tree = null;
+            egh_tree = null;
+
 
             /*
             String input_string = "10001000";
@@ -249,10 +258,10 @@ namespace FinalProject
         * [OUTPUT]:
         * void
         * ******************************************************************************************************************* */
-        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size, int alphabeth_size = 2)
+        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size, int alphabeth_size = 2, int number_of_vectors = 20, bool flag_limit_list = false)
         {
             // Stop condition
-            if (last_cell_in == (vector_size))
+            if (((flag_limit_list) && (error_vectors_list.Count > number_of_vectors)) || (last_cell_in == (vector_size)) )
             {
                 int[] tmp_vector = (int[])error_vector.Clone();
                 error_vectors_list.Add(tmp_vector);
@@ -262,7 +271,7 @@ namespace FinalProject
             for (int i = 0; i < alphabeth_size; i++)
             {
                 error_vector[last_cell_in] = i;
-                generate_alphabeth_vectors(error_vector, last_cell_in + 1, vector_size, alphabeth_size);
+                generate_alphabeth_vectors(error_vector, last_cell_in + 1, vector_size, alphabeth_size, number_of_vectors, flag_limit_list);
 
             }
         } // End of "generate_alphabeth_vectors"

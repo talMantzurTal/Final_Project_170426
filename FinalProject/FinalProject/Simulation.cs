@@ -50,7 +50,7 @@ namespace FinalProject
             ******************************************************************************/
             globals.clear_error_vector_list();
             int[] input_vector = new int[number_of_literals];
-            globals.generate_alphabeth_vectors(input_vector, 0, input_vector.Length, 2);
+            globals.generate_alphabeth_vectors(input_vector, 0, input_vector.Length, 2, 20, true);
             input_vectors = globals.get_error_vectors_list();
             // random_vectors(1, number_of_literals, 1, ref input_vectors);
 
