@@ -51,14 +51,14 @@ namespace FinalProject
             int tree_depth = (int)Math.Log(number_of_literals, 2);
             globals.clear_error_vector_list();
             int[] input_vector = new int[number_of_literals];
-            if (tree_depth <= 4)
+            if (tree_depth <=/*Tal= */4)
             {
                 
                 globals.generate_alphabeth_vectors(input_vector, 0, input_vector.Length, 2);
                 input_vectors = globals.get_error_vectors_list();
             }
             else
-                globals.random_vectors(20, number_of_literals, 2, ref input_vectors);
+                globals.random_vectors(100, number_of_literals, 1, ref input_vectors);
 
             
             // random_vectors(1, number_of_literals, 1, ref input_vectors);

@@ -140,7 +140,7 @@ namespace FinalProject
 
             foreach (PartyNode egh_node in egh_tree)
             {
-                if ((egh_node.get_depth() * 2 - 2) > egh_desired_depth) continue;
+                //if ((egh_node.get_depth() * 2 - 2) > egh_desired_depth) continue;
                 Node sub_tree_root_kw = new PartyNode();
                 // List <Node> sub_formula_arr = new List<Node>();
                 if (egh_node.get_depth() < 2)
@@ -156,7 +156,8 @@ namespace FinalProject
                     tmp_node_egh = (PartyNode)egh_node.get_parent(copy_flags.SHALLOW).get_parent(copy_flags.SHALLOW);
                     sub_tree_root_kw = tmp_node_egh.get_protocol_node_reference();
                 }
-                if (sub_tree_root_kw.get_if_leaf()) continue;
+                if (sub_tree_root_kw == null) continue;
+                //if (sub_tree_root_kw.get_if_leaf()) continue;
                 // Replace the last child with it's corresponding sub_tree (deep copy) with the sub_tree_root_kw as a root
                 if ((egh_node.get_child(num_of_children_idx) != null) && (egh_node.get_child(num_of_children_idx).get_name() == "0") )
                 {
@@ -164,7 +165,7 @@ namespace FinalProject
                     sub_tree_to_copy.set_depth();
 
                     // Verify that the new EGH tree depth is less than the egh_desired_depth 
-                    if (sub_tree_to_copy.get_depth() + egh_node.get_depth() < egh_desired_depth)
+                    if (sub_tree_to_copy.get_depth() + egh_node.get_depth() + 1 < egh_desired_depth) // TAL + 1
                     {
                         ProtocolTree cloned_sub_tree = new ProtocolTree(sub_tree_to_copy.deep_copy());
                         cloned_sub_tree.set_depth( sub_tree_to_copy.get_depth() );
@@ -174,7 +175,7 @@ namespace FinalProject
                             egh_node.inc_last_child_idx();
                             child_idx = egh_node.get_last_child_idx();
                         }
-                        egh_tree.copy_sub_tree((PartyNode)egh_node.get_child(child_idx), cloned_sub_tree);
+                        egh_tree.copy_sub_tree((PartyNode)egh_node.get_child(/*TAL child_idx*/num_of_children_idx), cloned_sub_tree);
                         //foreach (PartyNode sub_node in cloned_sub_tree)
                         ///////////////
                         //egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
@@ -206,7 +207,7 @@ namespace FinalProject
          **********************************************************************************************************/
         public static FormulaTree reverse_kw(ProtocolTree kw_tree, ProtocolTree egh_tree)
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            //var watch = System.Diagnostics.Stopwatch.StartNew();
             PartyNode curr_node = null;
             PartyNode curr_reachable_node = null;
             int zero_leaves_counter = 0;
@@ -273,11 +274,11 @@ namespace FinalProject
                 egh_tree.update_leaves_array();
                 curr_node = (PartyNode)egh_tree.get_leaves_array_cell(0);
             }
-            //TreeUtils.write_tree_to_file(egh_tree);
             FormulaTree resilient_formula = egh_tree.convert2FormulaTree();
             resilient_formula.number_gates_preorder();
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
+            //watch.Stop();
+            //Console.WriteLine("KW_reverse lasts = { 0 } ms", watch.ToString());
+            //var elapsedMs = watch.ElapsedMilliseconds;
             return resilient_formula;
             //return null; // TODO: change
         }

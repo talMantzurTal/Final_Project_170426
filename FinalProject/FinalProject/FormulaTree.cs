@@ -45,14 +45,13 @@ namespace FinalProject
             // The tree depth is the longest path in the tree
             if (new_node_depth > m_depth) m_depth = new_node_depth;
         }
-
-        // TAL
+        
         // TODO: implementation
         /* FormulaTree::calculate_formula()
          * The method calculate the formula implemented as a FormulaTree with the input to the formula
          * IN: formula_input = the input to the formula that should be calculated
          * ******************************************************************************************** */
-        public bool calculate_formula(int[] formula_input, int[] error_vector, bool flag_error = false /* for f = false and for F = true*/ )
+        public formula_result_type calculate_formula(int[] formula_input, int[] error_vector, bool flag_error = false /* for f = false and for F = true*/ )
         {
             Boolean[] bits = new Boolean[formula_input.Length];
 
@@ -105,7 +104,7 @@ namespace FinalProject
                         if (tmp_l_node_2 == null)
                         {
                             m_leaves_array.Clear();
-                            return false; // the error_vector is illegal for current tree
+                            return formula_result_type.ILLEGAL; // the error_vector is illegal for current tree
                         }
                         value = tmp_l_node_2.get_value();
                     }
@@ -140,7 +139,9 @@ namespace FinalProject
                 }
             }
             m_leaves_array.Clear();
-            return (tmp_l_node.get_value()); // the error_vector is legal for current tree
+            value = tmp_l_node.get_value();
+            if (value) return formula_result_type.TRUE;
+            else return formula_result_type.FALSE; // the error_vector is legal for current tree
         }
 
         public Tree deep_copy() //vered!!!
