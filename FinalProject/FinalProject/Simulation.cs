@@ -58,7 +58,7 @@ namespace FinalProject
                 input_vectors = globals.get_error_vectors_list();
             }
             else
-                globals.random_vectors(100, number_of_literals, 1, ref input_vectors);
+                globals.random_vectors(500, number_of_literals, 1, ref input_vectors);
 
             
             // random_vectors(1, number_of_literals, 1, ref input_vectors);
@@ -106,6 +106,14 @@ namespace FinalProject
             Error_fraction = globals.convert_string_fraction2double(Console.ReadLine());
             Console.WriteLine("Please enter a value for delta\n");
             Delta = globals.convert_string_fraction2double(Console.ReadLine());
+            globals.set_ui_parameters(Eps, Error_fraction, Delta);
+        }
+
+        public void internal_input_parameters(double[] input_params)
+        {
+            Eps = input_params[0];
+            Error_fraction = input_params[1];
+            Delta = input_params[2];
             globals.set_ui_parameters(Eps, Error_fraction, Delta);
         }
 

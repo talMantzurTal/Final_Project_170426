@@ -130,7 +130,7 @@ namespace FinalProject
             int num_of_children = kw_tree.get_root().get_num_of_children();
             int num_of_children_idx = num_of_children - 1;
             double depth_strech_param = (egh_tree.globals.egh_immune / egh_tree.globals.eps);
-            int egh_desired_depth = (int)depth_strech_param * kw_tree.get_depth();
+            int egh_desired_depth = (int)(depth_strech_param * kw_tree.get_depth());
             int child_idx = 0;
             
 
@@ -212,6 +212,7 @@ namespace FinalProject
             PartyNode curr_reachable_node = null;
             int zero_leaves_counter = 0;
             int num_of_children = egh_tree.get_root().get_num_of_children();
+            // Set the root's rewind child as unreachable
             ProtocolTree subtree_root = new ProtocolTree((PartyNode)egh_tree.get_root().get_child(num_of_children - 1));
             subtree_root.set_subtree_unreachable();
 
