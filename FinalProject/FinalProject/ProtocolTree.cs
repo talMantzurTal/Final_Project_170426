@@ -130,7 +130,7 @@ namespace FinalProject
             int num_of_children = kw_tree.get_root().get_num_of_children();
             int num_of_children_idx = num_of_children - 1;
             double depth_strech_param = (egh_tree.globals.egh_immune / egh_tree.globals.eps);
-            int egh_desired_depth = (int)(depth_strech_param * kw_tree.get_depth());
+            int egh_desired_depth = (int)Math.Ceiling(depth_strech_param * kw_tree.get_depth());
             int child_idx = 0;
             
 
@@ -140,6 +140,7 @@ namespace FinalProject
 
             foreach (PartyNode egh_node in egh_tree)
             {
+                if ((egh_node.get_parent() != null) && (egh_node.get_parent().get_name() == "0")) continue;
                 //if ((egh_node.get_depth() * 2 - 2) > egh_desired_depth) continue;
                 Node sub_tree_root_kw = new PartyNode();
                 // List <Node> sub_formula_arr = new List<Node>();
@@ -161,26 +162,31 @@ namespace FinalProject
                 // Replace the last child with it's corresponding sub_tree (deep copy) with the sub_tree_root_kw as a root
                 if ((egh_node.get_child(num_of_children_idx) != null) && (egh_node.get_child(num_of_children_idx).get_name() == "0") )
                 {
+                    
                     ProtocolTree sub_tree_to_copy = new ProtocolTree((PartyNode)sub_tree_root_kw);
                     sub_tree_to_copy.set_depth();
 
                     // Verify that the new EGH tree depth is less than the egh_desired_depth 
+                    
                     if (sub_tree_to_copy.get_depth() + egh_node.get_depth() + 1 < egh_desired_depth) // TAL + 1
                     {
                         ProtocolTree cloned_sub_tree = new ProtocolTree(sub_tree_to_copy.deep_copy());
                         cloned_sub_tree.set_depth( sub_tree_to_copy.get_depth() );
-                        child_idx = egh_node.get_last_child_idx() + 1;
-                        while ( (child_idx < egh_node.get_num_of_children() ) && (egh_node.get_child(child_idx).get_name() != "0"))
-                        {
-                            egh_node.inc_last_child_idx();
-                            child_idx = egh_node.get_last_child_idx();
-                        }
-                        egh_tree.copy_sub_tree((PartyNode)egh_node.get_child(/*TAL child_idx*/num_of_children_idx), cloned_sub_tree);
+                       // child_idx = egh_node.get_last_child_idx() + 1;
+                       // while ( (child_idx < egh_node.get_num_of_children() ) && (egh_node.get_child(child_idx).get_name() != "0"))
+                       // {
+                       //    egh_node.inc_last_child_idx();
+                       //     child_idx = egh_node.get_last_child_idx();
+                       // }
+                        egh_tree.copy_sub_tree((PartyNode)egh_node.get_child(/*TAL child_idx*/ num_of_children_idx), cloned_sub_tree);
+                        
+                    
                         //foreach (PartyNode sub_node in cloned_sub_tree)
                         ///////////////
                         //egh_node.add_child(cloned_sub_tree.get_root(), num_of_children_idx, copy_flags.SHALLOW);
                     }
-                }
+                    //egh_node.get_child(num_of_children_idx).set_node(sub_tree_root_kw);
+                 }
             }
 
             //TreeUtils.write_tree_to_file(egh_tree);
@@ -455,6 +461,8 @@ namespace FinalProject
                 // If curr_node == root, move orizontally to the next child
                 else if (curr_parent_sub_tree2copy.get_last_child_idx() < m_num_of_children-1 )
                 {
+                    // If curr_node == root and doesn't have children --> is a leaf in the tree
+                    if (curr_parent_sub_tree2copy.get_child(0) == null) break;
                     curr_parent_zero_sub_tree = (PartyNode)curr_parent_zero_sub_tree.get_child(curr_parent_zero_sub_tree.get_last_child_idx());
                     curr_parent_sub_tree2copy = (PartyNode)curr_parent_sub_tree2copy.get_child(curr_parent_sub_tree2copy.get_last_child_idx());
                 }

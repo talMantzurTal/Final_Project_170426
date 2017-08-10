@@ -44,16 +44,18 @@ namespace FinalProject
 
         static void Main(string[] args)
         {
-            //TreeUtils.set_tree_names(6);
+            TreeUtils.set_tree_names(5);
             Globals globals;
             globals = Globals.get_instance();
             Simulation simulation = Simulation.get_instance();
             //simulation.ui_input_parameters();
             List<double[]> simulations_param = new List<double[]>();
             double delta = 0.0, epsilon = globals.eps;
+            int faulty_gates = 0;
             // Run simulation for multiple values of epsilon:
             // ---------------------------------------------
-            for (epsilon = /*2.0 / 15.0*/5.0/30.0; epsilon < 1.0 / 3.0; epsilon += 1.0 / 90.0)
+            for (epsilon = /*2.0 / 15.0*/4.0/30.0; epsilon < 1.0 / 3.0; epsilon += 1.0 / 90.0)
+            //epsilon = 1.0 / 6.0;
             {
                 double[] sim_params = { epsilon, 1.0/3.0-epsilon, 0 };
                 simulation.internal_input_parameters(sim_params);
@@ -68,6 +70,7 @@ namespace FinalProject
                     // Run simulation for multiple values of delta:
                     // -------------------------------------------
                     for (delta = 0.0; delta <= globals.error_fraction; delta = delta + 0.01)
+                    //delta = 0.0;
                     {
                         List<int[]> input_vectors = new List<int[]>();
                         List<int[]> error_vectors = new List<int[]>();
@@ -78,7 +81,7 @@ namespace FinalProject
                         // Simulate:
                         // --------
                         simulation.simulate(/*resilient_formula.get_number_of_int_nodes(),*/ formula_tree_input.get_number_of_leaves(), ref input_vectors/*, ref error_vectors*/);
-                        generate_err_vectors(resilient_formula, ref error_vectors, 1, resilient_formula.get_number_of_int_nodes(), globals.delta);
+                        generate_err_vectors(resilient_formula, ref error_vectors, 1, resilient_formula.get_number_of_int_nodes(), globals.delta, ref faulty_gates);
                         formula_result_type f_output, F_output;
                         string msg1 = "", msg2 = "";
                         string symbol;
@@ -136,7 +139,7 @@ namespace FinalProject
                             //Console.WriteLine("Claculate formula for all inputs lasts = { 0 } ms", watch.ToString());
                         }
                         fs.WriteLine("Eps = {0}, Ro = {1}, Delta = {2}", globals.eps.ToString(), globals.error_fraction.ToString(), globals.delta.ToString());
-                        fs.WriteLine("{0} failed out of {1}", faild_counter, ((input_vectors.Count) * (error_vectors.Count)).ToString());
+                        fs.WriteLine("{0} failed out of {1}, and {2} faulty gates out of {3}", faild_counter, ((input_vectors.Count) * (error_vectors.Count)).ToString(), faulty_gates, resilient_formula.get_number_of_int_nodes());
                         fs.WriteLine("Resilient tree depth = {0}", resilient_formula.get_depth().ToString());
                         //}
                     }
@@ -153,7 +156,7 @@ namespace FinalProject
             resilient_formula = ProtocolTree.reverse_kw(kw_tree, egh_tree);
 
         }
-        public static void generate_err_vectors(FormulaTree resilient_formula, ref List<int[]> error_vectors, int num_of_vectors, int number_of_gates, double delta)
+        public static void generate_err_vectors(FormulaTree resilient_formula, ref List<int[]> error_vectors, int num_of_vectors, int number_of_gates, double delta, ref int faulty_gates)
         {
             Globals globals;
             globals = Globals.get_instance();
@@ -222,6 +225,7 @@ namespace FinalProject
                 if (err_vector[i] != globals.NO_ERROR)
                     counter_total_error++;
             }
+                faulty_gates = counter_total_error;
             Console.WriteLine("{0} faulty gates out of {1} gates", counter_total_error.ToString(), number_of_gates);
             }
         } // foreach err_vector

@@ -14,8 +14,9 @@ namespace FinalProject
         private PartyNode m_protocol_node_reference; // used for egh transformation
         private bool m_is_zero_padding;
         //public List<int[]> error_vectors_list; TAL
-        private int m_zero_node_counter;
+        //private int m_zero_node_counter;
         private reachable_type m_reachable;
+        private bool m_protocol_end_flag;
 
 
         // C'TOR
@@ -31,8 +32,9 @@ namespace FinalProject
             // m_sub_formula_tree = new FormulaTree(m_num_of_children,null);
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
+            m_protocol_end_flag = false;
             // TAL error_vectors_list = new List<int[]>();
-            m_zero_node_counter = 0;
+            //m_zero_node_counter = 0;
         }
 
         public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent = null, Node f_tree = null) :
@@ -49,8 +51,9 @@ namespace FinalProject
             m_sub_formula_tree = f_tree;
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
+            m_protocol_end_flag = false;
             // TAL error_vectors_list = new List<int[]>();
-            m_zero_node_counter = 0;
+            //m_zero_node_counter = 0;
         }
 
         public PartyNode(Node node)
@@ -95,7 +98,8 @@ namespace FinalProject
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", node.get_type().ToString());
             }
             m_is_zero_padding = false;
-            m_zero_node_counter = 0;
+            m_protocol_end_flag = false;
+            //m_zero_node_counter = 0;
         }
 
         // GETTERS
@@ -124,10 +128,10 @@ namespace FinalProject
             return m_reachable;
         }
 
-        public int get_zero_node_counter()
+       /* public int get_zero_node_counter()
         {
             return m_zero_node_counter;
-        }
+        }*/
 
 
         // SETTERS
@@ -153,7 +157,7 @@ namespace FinalProject
             m_reachable = reachable_in;
         }
 
-        public void set_zero_node_counter(int zero_node_counter)
+       /* public void set_zero_node_counter(int zero_node_counter)
         {
             m_zero_node_counter = zero_node_counter;
         }
@@ -166,7 +170,7 @@ namespace FinalProject
         public void dec_zero_node_counter()
         {
             m_zero_node_counter -= 2;
-        }
+        }*/
 
         public override void set_node(Node reference_node)
         {
@@ -176,7 +180,7 @@ namespace FinalProject
             m_protocol_node_reference = p_reference_node.get_protocol_node_reference();
             m_is_zero_padding = p_reference_node.get_is_zero_padding();
             //error_vectors_list = p_reference_node.get_error_vectors_list();
-            m_zero_node_counter = p_reference_node.get_zero_node_counter();
+           // m_zero_node_counter = p_reference_node.get_zero_node_counter();
             m_reachable = p_reference_node.get_reachable();
         }
 
@@ -197,122 +201,6 @@ namespace FinalProject
             return (party_node_cpy);
         }
 
-
-#if tal
-        /* PartyNode::generate_alphabeth_vectors()
-         * The recursive method generates all vectors with a d-ary alphabeth in size of a specific size. 
-         * The vectors store in a data member of type List<int[]> 
-         * 
-         * [INPUT]:
-         * error_vector     = The generated vector in each point
-         * last_cell_in     = The last cell the function filled in the error_vector
-         * vector_size      = depth of a PartyNode in the EGH tree
-         * 
-         * [OUTPUT]:
-         * void
-         * ******************************************************************************************************************* */
-        public void generate_alphabeth_vectors(int[] error_vector, int last_cell_in, int vector_size, int alphabeth_size = 2)
-        {
-            // Stop condition
-            if ( last_cell_in == (vector_size) )
-            {
-                int[] tmp_vector = (int[])error_vector.Clone();
-                error_vectors_list.Add(tmp_vector);
-                return;
-            }
-            
-            for (int i = 0; i < alphabeth_size; i++)
-            {
-                error_vector[last_cell_in] = i;
-                generate_alphabeth_vectors(error_vector, last_cell_in+1, vector_size);
-                
-            }
-        } // End of "generate_alphabeth_vectors"
-
-
-        /* PartyNode::limit_num_of_errors()
-         * This method goes over all binary vectors which define errors (1 = error , 0 = no error)
-         * and for each vector checks: if the number of errors (cells that contains 1)
-         * are bigger than error limit -> dispose this vector.
-         * 
-         * [INPUT]:
-         * optional_binary_vectors = list of all binary vector with size n (2^n vectors)
-         * 
-         * [OUTPUT]:
-         * limit_num_of_errors = list of legal error vectors - don't contain more than ERROR_FRACTION errors.
-         * ********************************************************************************************************************/
-        public List<int[]> limit_num_of_errors(List<int[]> optional_binary_vectors)
-        {
-            int vector_sum = 0;
-            int N = optional_binary_vectors[0].Length;
-            int max_num_of_errors = (int)(N * globals.error_fraction);
-            bool flag_illegal_error = false;
-
-            List<int[]> binary_vectors_to_return = new List<int[]>();
-
-            foreach(int[] error_vector in optional_binary_vectors)
-            {
-                vector_sum = 0;
-                for (int cell_idx = 0; cell_idx < error_vector.Length; cell_idx++)
-                {
-                    vector_sum += error_vector[cell_idx];
-                    if ( vector_sum > max_num_of_errors )
-                    {
-                        // Removes illegal vectors
-                        flag_illegal_error = true;
-                        break;
-                    }
-                    if (error_vector[cell_idx] == 0)
-                        // (cells == 0) --> indicates that there is no error
-                        error_vector[cell_idx] = globals.NO_ERROR;
-                }
-                if (flag_illegal_error == false)
-                    binary_vectors_to_return.Add(error_vector);
-
-            }
-            return binary_vectors_to_return;
-        } // End of "limit_num_of_errors"
-
-        /* PartyNode::generate_legel_vectors()
-         * This method generates all legal vectors (including some fraction of errors according to user's constraint)
-         * which define path from root to a specified node.
-         * 
-         * [INPUT]:
-         * legal_error_vectors = list of binary vectors (1 = erro, 0 = no error), which contains only
-         * vectors with a legal num of errors (restrictes amount of errors according to user's definition).
-         * real_egh_path       = list of child indices which define a path from root to node in EGH tree.
-         * 
-         * [OUTPUT]:
-         * error_vectors_per_node = List of error vectors which suitable to a specified node. each one of 
-         * those vectors defines a path from root to node including some errors. (contain all egal options).
-         * ********************************************************************************************************************/
-        public List<int[]> generate_legel_vectors(List<int[]> legal_error_vectors, List<int> real_egh_path)
-        {
-            List<int[]> error_vectors_per_node = new List<int[]>();
-            int error_vector_length = legal_error_vectors[0].Length;
-
-            foreach (int[] error_vector in legal_error_vectors)
-            {
-                int[] tmp_legal_error_vector = new int[error_vector_length];
-                for (int cell_idx = 0; cell_idx < error_vector_length; cell_idx++)
-                {
-                    if (error_vector[cell_idx] == (int)globals.NO_ERROR)
-                    {
-                        tmp_legal_error_vector[cell_idx] = globals.NO_ERROR;
-                    }
-                    else // ERROR
-                    {
-                        tmp_legal_error_vector[cell_idx] = real_egh_path[cell_idx];
-                    }
-
-                }
-                error_vectors_per_node.Add(tmp_legal_error_vector);
-            }
-
-            return error_vectors_per_node;
-        } // End of "generate_leagel_vectors"
-
-#endif
 
         /* PartyNode::is_reachable()
          * This method check if a specified node is reachable.
@@ -346,7 +234,14 @@ namespace FinalProject
             int iterate_idx = 0;
             PartyNode curr_node = (PartyNode)kw_tree.get_root();
             PartyNode tmp_egh_node = new PartyNode();
+            PartyNode tmp_node = new PartyNode(); 
 
+            // If this doesn't have children but isn't a leaf in the KW tree --> set as UNREACHABLE
+            if ( ( (this.get_children() == null) || (this.get_child(0) == null)) && (!this.get_if_leaf() ) )
+            {
+                this.set_reachable(reachable_type.UNREACHABLE);
+                return;
+            }
             foreach ( int[] error_vector in error_vectors_per_node)
             {
                 iterate_idx = 0;
@@ -355,13 +250,20 @@ namespace FinalProject
                 {
                     if ( curr_node.get_if_leaf() )
                     {
-                        if ( error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1) )
-                            curr_node.dec_zero_node_counter();
-                        else if ( error_vector[iterate_idx] == globals.NO_ERROR )
+                        if ((error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1)) || (egh_path_to_node[iterate_idx] == (curr_node.get_num_of_children() - 1)))
+                        {
+                            if (curr_node.get_depth() >= 2)
+                                curr_node = (PartyNode)curr_node.get_parent().get_parent();
+                        }
+                        else
+                        {
+                            break;  // Protocol starts to send zeroes --> protocol ends with a leaf and the node is REACHABLE
+                        }
+                        /*if (error_vector[iterate_idx] == globals.NO_ERROR)
                             curr_node.inc_zero_node_counter();
-                        else if ( ( error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && ( error_vector[iterate_idx] >= 0 ) )
+                        else if ((error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && (error_vector[iterate_idx] >= 0))
                             curr_node.inc_zero_node_counter();
-                        else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());
+                        else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());*/
                     }
                     else // curr_node isn't a leaf
                     {

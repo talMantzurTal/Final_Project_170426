@@ -172,7 +172,7 @@ namespace FinalProject
                 if ((node.get_if_leaf()) && (max_depth < node.get_depth()))
                     max_depth = node.get_depth();
             }
-            m_depth = max_depth ; // according number of edges
+            m_depth = max_depth - this.get_root().get_depth(); // according number of edges
 
         }
 
