@@ -14,9 +14,9 @@ namespace FinalProject
         private PartyNode m_protocol_node_reference; // used for egh transformation
         private bool m_is_zero_padding;
         //public List<int[]> error_vectors_list; TAL
-        //private int m_zero_node_counter;
+        private int m_zero_node_counter;
         private reachable_type m_reachable;
-        private bool m_protocol_end_flag;
+        //private bool m_protocol_end_flag;
 
 
         // C'TOR
@@ -32,9 +32,9 @@ namespace FinalProject
             // m_sub_formula_tree = new FormulaTree(m_num_of_children,null);
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
-            m_protocol_end_flag = false;
+            //m_protocol_end_flag = false;
             // TAL error_vectors_list = new List<int[]>();
-            //m_zero_node_counter = 0;
+            m_zero_node_counter = 0;
         }
 
         public PartyNode(string name, node_type type, int depth, int number_of_children, PartyNode parent = null, Node f_tree = null) :
@@ -51,9 +51,9 @@ namespace FinalProject
             m_sub_formula_tree = f_tree;
             m_protocol_node_reference = null;
             m_is_zero_padding = false;
-            m_protocol_end_flag = false;
+            //m_protocol_end_flag = false;
             // TAL error_vectors_list = new List<int[]>();
-            //m_zero_node_counter = 0;
+            m_zero_node_counter = 0;
         }
 
         public PartyNode(Node node)
@@ -98,8 +98,8 @@ namespace FinalProject
                 throw new System.ArgumentException("Invalid type for Node, suppose to be AND or OR", node.get_type().ToString());
             }
             m_is_zero_padding = false;
-            m_protocol_end_flag = false;
-            //m_zero_node_counter = 0;
+            // m_protocol_end_flag = false;
+            m_zero_node_counter = 0;
         }
 
         // GETTERS
@@ -128,10 +128,10 @@ namespace FinalProject
             return m_reachable;
         }
 
-       /* public int get_zero_node_counter()
+        public int get_zero_node_counter()
         {
             return m_zero_node_counter;
-        }*/
+        }
 
 
         // SETTERS
@@ -157,7 +157,7 @@ namespace FinalProject
             m_reachable = reachable_in;
         }
 
-       /* public void set_zero_node_counter(int zero_node_counter)
+        public void set_zero_node_counter(int zero_node_counter)
         {
             m_zero_node_counter = zero_node_counter;
         }
@@ -170,7 +170,7 @@ namespace FinalProject
         public void dec_zero_node_counter()
         {
             m_zero_node_counter -= 2;
-        }*/
+        }
 
         public override void set_node(Node reference_node)
         {
@@ -249,21 +249,28 @@ namespace FinalProject
                 while ( iterate_idx < error_vector.Length )
                 {
                     if ( curr_node.get_if_leaf() )
+                    // If we get to a leaf in the kw_tree we have two options:
+                    // 1. we get in the EGH tree to a leaf (after finish traverse the error vector --> REACHABLE
+                    // 2. we haven't finished traversing the error vector and the EGH tree, so the protocol hasn't finished 
+                    // --> traverse a zero tree from the curr_leaf using a zero counter
                     {
                         if ((error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1)) || (egh_path_to_node[iterate_idx] == (curr_node.get_num_of_children() - 1)))
                         {
+                        // If the next move is 2 (a rewind-if symbol in the EGH tree or in the error vector) - move 2 steps upwards
                             if (curr_node.get_depth() >= 2)
                                 curr_node = (PartyNode)curr_node.get_parent().get_parent();
                         }
-                        else
+                       /* else
                         {
                             break;  // Protocol starts to send zeroes --> protocol ends with a leaf and the node is REACHABLE
-                        }
-                        /*if (error_vector[iterate_idx] == globals.NO_ERROR)
+                        }*/
+                        else if (error_vector[iterate_idx] == globals.NO_ERROR)
+                        // Keep send zeroes
                             curr_node.inc_zero_node_counter();
                         else if ((error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && (error_vector[iterate_idx] >= 0))
+                        // If an error occured, "move" to the relevant child
                             curr_node.inc_zero_node_counter();
-                        else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());*/
+                        else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());
                     }
                     else // curr_node isn't a leaf
                     {
@@ -292,8 +299,8 @@ namespace FinalProject
                     if ( curr_node.get_if_leaf() )
                     {
                         tmp_egh_node = this;
-                        //tmp_egh_node.m_reachable = reachable_type.REACHABLE;
-                        // update that all path from root to this is reachble
+                        // tmp_egh_node.m_reachable = reachable_type.REACHABLE;
+                        // Update that all path from root to this is reachble
                         while (tmp_egh_node.get_parent() != null)
                         {
                             tmp_egh_node.set_reachable(reachable_type.REACHABLE);

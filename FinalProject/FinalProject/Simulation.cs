@@ -32,22 +32,7 @@ namespace FinalProject
 
             // 2. Generate input vectors for f, F (size = number of literals)
             int[] bin_vector = new int[number_of_literals];
-            /* for multiple input vectors
-             * **************************
-            globals.generate_alphabeth_vectors(bin_vector, 0, bin_vector.Length,2);
-            List<int[]> tmp_input_vectors = new List<int[]>();
-            tmp_input_vectors = globals.get_error_vectors_list();
-            int[] copied_vector = new int[number_of_literals];
 
-            foreach ( int[] vector in input_vectors )
-            {
-                for (int i = 0; i<number_of_literals; i++)
-                {
-                    copied_vector[i] = vector[i];
-                }
-                input_vectors.Add(copied_vector);
-            }
-            ******************************************************************************/
             int tree_depth = (int)Math.Log(number_of_literals, 2);
             globals.clear_error_vector_list();
             int[] input_vector = new int[number_of_literals];
@@ -60,39 +45,6 @@ namespace FinalProject
             else
                 globals.random_vectors(500, number_of_literals, 1, ref input_vectors);
 
-            
-            // random_vectors(1, number_of_literals, 1, ref input_vectors);
-
-            // 3. Generate error vectors for F
-            //globals.clear_error_vector_list();
-#if t
-            int[] error_vector = new int[number_of_gates];
-            //globals.generate_alphabeth_vectors(error_vector, 0, error_vector.Length, 3);
-            //error_vectors = globals.get_error_vectors_list();
-            List<int[]> randomized_path = new List<int[]>();
-            random_vectors(5, number_of_gates, 2, ref randomized_path);
-            
-            while (error_vectors.Count == 0)
-            {
-                //random_vectors(5, number_of_gates, 1, ref error_vectors);
-                for (int num_of_vectors = 0; num_of_vectors < number_of_gates; num_of_vectors++)
-                {
-                    int[] vector = new int[number_of_gates];
-                    for (int i = 0; i < 5; i++)
-                    {
-                        if (i % 8 == 0)
-                            vector[i * 8] = 1;
-                        else vector[i * 8] = 0;
-                    }
-                    error_vectors.Add(vector);
-                }
-                error_vectors = globals.limit_num_of_errors(error_vectors, globals.delta);
-            }
-            error_vectors = globals.generate_legel_vectors(error_vectors, randomized_path);
-#endif
-            // 4. Calculate formula trees: f, F
-
-            // 5. Compare f_output, F_output and print results to a file
             return;
 
 

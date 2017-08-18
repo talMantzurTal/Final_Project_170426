@@ -283,9 +283,7 @@ namespace FinalProject
             }
             FormulaTree resilient_formula = egh_tree.convert2FormulaTree();
             resilient_formula.number_gates_preorder();
-            //watch.Stop();
-            //Console.WriteLine("KW_reverse lasts = { 0 } ms", watch.ToString());
-            //var elapsedMs = watch.ElapsedMilliseconds;
+            resilient_formula.set_depth();
             return resilient_formula;
             //return null; // TODO: change
         }

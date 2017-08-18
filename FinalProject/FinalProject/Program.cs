@@ -44,107 +44,117 @@ namespace FinalProject
 
         static void Main(string[] args)
         {
-            TreeUtils.set_tree_names(5);
-            Globals globals;
-            globals = Globals.get_instance();
-            Simulation simulation = Simulation.get_instance();
-            //simulation.ui_input_parameters();
-            List<double[]> simulations_param = new List<double[]>();
-            double delta = 0.0, epsilon = globals.eps;
-            int faulty_gates = 0;
-            // Run simulation for multiple values of epsilon:
-            // ---------------------------------------------
-            for (epsilon = /*2.0 / 15.0*/4.0/30.0; epsilon < 1.0 / 3.0; epsilon += 1.0 / 90.0)
-            //epsilon = 1.0 / 6.0;
+            for (int k = 3; k < 7; k++)
             {
-                double[] sim_params = { epsilon, 1.0/3.0-epsilon, 0 };
-                simulation.internal_input_parameters(sim_params);
-
-                FormulaTree formula_tree_input = new FormulaTree(), resilient_formula = new FormulaTree();
-                main_black_box(ref formula_tree_input, ref resilient_formula);
-
-            
-                var FILE_PATH = string.Format(@"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\simulation_results_eps_{0}.txt", globals.eps.ToString());
-                using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
+                TreeUtils.set_tree_names(k);
+                Globals globals;
+                globals = Globals.get_instance();
+                Simulation simulation = Simulation.get_instance();
+                //simulation.ui_input_parameters();
+                List<double[]> simulations_param = new List<double[]>();
+                double delta = 0.0, epsilon = globals.eps;
+                int faulty_gates = 0, max_errors_per_path = 0;
+                int prev_faulty_gates = -1;
+                // Run simulation for multiple values of epsilon:
+                // ---------------------------------------------
+                //for (epsilon = 2.0 / 15.0/*1.0 / 9.0*/; epsilon < 1.0 / 3.0; epsilon += 1.0 / 90.0)
+                //for (epsilon = 29.0/90.0; epsilon >= 3.0 / 17.0; epsilon -= 1.0 / 90.0)
+                for (epsilon = 3.0 / 17.0; epsilon >= 2.0/15.0; epsilon -= 1.0 / 90.0)
+                //epsilon = 1.0 / 6.0;
                 {
-                    // Run simulation for multiple values of delta:
-                    // -------------------------------------------
-                    for (delta = 0.0; delta <= globals.error_fraction; delta = delta + 0.01)
-                    //delta = 0.0;
+                    prev_faulty_gates = -1;
+                    double[] sim_params = { epsilon, 1.0 / 3.0 - epsilon, 0 };
+                    simulation.internal_input_parameters(sim_params);
+
+                    FormulaTree formula_tree_input = new FormulaTree(), resilient_formula = new FormulaTree();
+                    main_black_box(ref formula_tree_input, ref resilient_formula);
+
+
+                    var FILE_PATH = string.Format(@"C:\Users\mantz\Documents\GitHub\Final_Project_170202\Final_Project_170426\simulation_results_depth_{0}_eps_{1}.txt", k.ToString(),globals.eps.ToString());
+                    using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
                     {
-                        List<int[]> input_vectors = new List<int[]>();
-                        List<int[]> error_vectors = new List<int[]>();
-                        // Update globals.delta
-                        globals.delta = delta;
-
-
-                        // Simulate:
-                        // --------
-                        simulation.simulate(/*resilient_formula.get_number_of_int_nodes(),*/ formula_tree_input.get_number_of_leaves(), ref input_vectors/*, ref error_vectors*/);
-                        generate_err_vectors(resilient_formula, ref error_vectors, 1, resilient_formula.get_number_of_int_nodes(), globals.delta, ref faulty_gates);
-                        formula_result_type f_output, F_output;
-                        string msg1 = "", msg2 = "";
-                        string symbol;
-                        string[] pass_fail_msg = { "Pass", "Fail" };
-                        int pass_fail_idx = 0, faild_counter = 0;
-
-                        //using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
-                        //{
-                        foreach (int[] err_vector in error_vectors)
+                        // Run simulation for multiple values of delta:
+                        // -------------------------------------------
+                        //for (delta = 0.0; delta <= globals.error_fraction; delta = delta + 0.01)
+                        delta = 0.0;
                         {
-                            for (int i = 0; i < err_vector.Length; i++)
+                            List<int[]> input_vectors = new List<int[]>();
+                            List<int[]> error_vectors = new List<int[]>();
+                            // Update globals.delta
+                            globals.delta = delta;
+                            max_errors_per_path = (int)(resilient_formula.get_depth() * delta);
+
+                            // Simulate:
+                            // --------
+                            simulation.simulate(/*resilient_formula.get_number_of_int_nodes(),*/ formula_tree_input.get_number_of_leaves(), ref input_vectors/*, ref error_vectors*/);
+                            generate_err_vectors(resilient_formula, ref error_vectors, 1, resilient_formula.get_number_of_int_nodes(), globals.delta, ref faulty_gates);
+                            //if  ( (faulty_gates == 0) && (prev_faulty_gates == 0) ) continue; // Optimize the simulation run time
+                            prev_faulty_gates = faulty_gates;
+
+                            formula_result_type f_output, F_output;
+                            string msg1 = "", msg2 = "";
+                            string symbol;
+                            string[] pass_fail_msg = { "Pass", "Fail" };
+                            int pass_fail_idx = 0, faild_counter = 0;
+
+                            //using (System.IO.StreamWriter fs = new System.IO.StreamWriter(FILE_PATH))
+                            //{
+                            foreach (int[] err_vector in error_vectors)
                             {
-                                symbol = err_vector[i].ToString();
-                                if (symbol == "-2")
-                                    symbol = "*";
-                                msg1 += symbol;
-                            }
-                            fs.WriteLine("Error Vector = {0}", msg1);
-                            ///////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                            //int[] vec = new int[resilient_formula.get_number_of_int_nodes()];
-                            ///////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                            //var watch = System.Diagnostics.Stopwatch.StartNew();
-                            foreach (int[] input_vector in input_vectors)
-                            {
-                                f_output = formula_tree_input.calculate_formula(input_vector, null);
-
-
-                                F_output = resilient_formula.calculate_formula(input_vector, err_vector, true);
-
-                                //F_output = resilient_formula.calculate_formula(input_vector, null, false);
-                                //F_output = resilient_formula.calculate_formula(vec, null, false);
-
-                                // print
-                                for (int i = 0; i < input_vector.Length; i++)
+                                for (int i = 0; i < err_vector.Length; i++)
                                 {
-                                    symbol = input_vector[i].ToString();
+                                    symbol = err_vector[i].ToString();
                                     if (symbol == "-2")
                                         symbol = "*";
-                                    msg2 += symbol;
+                                    msg1 += symbol;
                                 }
-
-                                if (F_output == formula_result_type.ILLEGAL) continue;
-                                if (f_output != F_output)
+                                fs.WriteLine("Error Vector = {0}", msg1);
+                                ///////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                //int[] vec = new int[resilient_formula.get_number_of_int_nodes()];
+                                ///////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                //var watch = System.Diagnostics.Stopwatch.StartNew();
+                                foreach (int[] input_vector in input_vectors)
                                 {
-                                    pass_fail_idx = 1;
-                                    faild_counter++;
-                                }
-                                else pass_fail_idx = 0;
+                                    f_output = formula_tree_input.calculate_formula(input_vector, null);
 
-                                fs.WriteLine("{0}    {1}    {2}    {3}", msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
-                                msg1 = "";
-                                msg2 = "";
+
+                                    F_output = resilient_formula.calculate_formula(input_vector, err_vector, true);
+
+                                    //F_output = resilient_formula.calculate_formula(input_vector, null, false);
+                                    //F_output = resilient_formula.calculate_formula(vec, null, false);
+
+                                    // print
+                                    for (int i = 0; i < input_vector.Length; i++)
+                                    {
+                                        symbol = input_vector[i].ToString();
+                                        if (symbol == "-2")
+                                            symbol = "*";
+                                        msg2 += symbol;
+                                    }
+
+                                    if (F_output == formula_result_type.ILLEGAL) continue;
+                                    if (f_output != F_output)
+                                    {
+                                        pass_fail_idx = 1;
+                                        faild_counter++;
+                                    }
+                                    else pass_fail_idx = 0;
+
+                                    fs.WriteLine("{0}    {1}    {2}    {3}", msg2 /*error_vector.ToString()*/, f_output, F_output, pass_fail_msg[pass_fail_idx]);
+                                    msg1 = "";
+                                    msg2 = "";
+                                }
+                                //watch.Stop();
+                                //Console.WriteLine("Claculate formula for all inputs lasts = { 0 } ms", watch.ToString());
                             }
-                            //watch.Stop();
-                            //Console.WriteLine("Claculate formula for all inputs lasts = { 0 } ms", watch.ToString());
+                            fs.WriteLine("Eps = {0}, Ro = {1}, Delta = {2}, max_errors_pre_path = {3}", globals.eps.ToString(), globals.error_fraction.ToString(), globals.delta.ToString(), max_errors_per_path.ToString());
+                            fs.WriteLine("{0} failed out of {1}, and {2} faulty gates out of {3}", faild_counter, ((input_vectors.Count) * (error_vectors.Count)).ToString(), faulty_gates, resilient_formula.get_number_of_int_nodes());
+                            fs.WriteLine("Resilient tree depth = {0}", resilient_formula.get_depth().ToString());
+                            //}
                         }
-                        fs.WriteLine("Eps = {0}, Ro = {1}, Delta = {2}", globals.eps.ToString(), globals.error_fraction.ToString(), globals.delta.ToString());
-                        fs.WriteLine("{0} failed out of {1}, and {2} faulty gates out of {3}", faild_counter, ((input_vectors.Count) * (error_vectors.Count)).ToString(), faulty_gates, resilient_formula.get_number_of_int_nodes());
-                        fs.WriteLine("Resilient tree depth = {0}", resilient_formula.get_depth().ToString());
-                        //}
                     }
                 }
-            } 
+            }
             return;
         }
         static void main_black_box(ref FormulaTree formula_tree_input, ref FormulaTree resilient_formula)
@@ -167,6 +177,7 @@ namespace FinalProject
             resilient_formula.set_leaves_array();
             List<Node> leaves_array = resilient_formula.get_leaves_array();
             Random rnd = new Random();
+            int no_error = 0;
 
             foreach (int[] err_vector in error_vectors)
             {
@@ -207,25 +218,42 @@ namespace FinalProject
                                     } // End if switch case
                                 } // End of while
                             } // End of if
-                            else  err_vector[tmp_node.get_gate_idx()] = globals.NO_ERROR;
+                            else
+                            {
+                                err_vector[tmp_node.get_gate_idx()] = globals.NO_ERROR;
+                                no_error++;
+                            }
                         }
                         // No error:
                         // --------
                         else if ((err_vector[tmp_node.get_gate_idx()] == alphabet_size))
                         {
                             err_vector[tmp_node.get_gate_idx()] = globals.NO_ERROR;
+                            no_error++;
                         }
                     } // End of while - finish the traversal of a path
                 } // foreach Node leaf
-            
-        
+#if t
+                foreach (Node leaf in leaves_array)
+                {
+                    couter_err_per_path = 0;
+                    tmp_node = leaf;
+                    while (tmp_node.get_parent() != null)
+                    {
+                        tmp_node = tmp_node.get_parent();
+                        if (err_vector[tmp_node.get_gate_idx()] != globals.NO_ERROR) couter_err_per_path++;
+                    }
+                    if (couter_err_per_path > 1)
+                        Console.WriteLine("ERROR- counter_err_per_path == {0}", couter_err_per_path.ToString());
+                }
+#endif 
             // Print the number of error in the current vector
             for (int i = 0; i < err_vector.Length; i++)
             {
                 if (err_vector[i] != globals.NO_ERROR)
                     counter_total_error++;
             }
-                faulty_gates = counter_total_error;
+            faulty_gates = counter_total_error;
             Console.WriteLine("{0} faulty gates out of {1} gates", counter_total_error.ToString(), number_of_gates);
             }
         } // foreach err_vector
@@ -374,7 +402,7 @@ namespace FinalProject
         {
             int vector_sum = 0;
             int N = optional_binary_vectors[0].Length;
-            int max_num_of_errors = (int)(N * error_fraction);
+            int max_num_of_errors = (int)Math.Floor(N * error_fraction);
             bool flag_illegal_error = false;
 
             List<int[]> binary_vectors_to_return = new List<int[]>();
