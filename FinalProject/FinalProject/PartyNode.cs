@@ -167,9 +167,9 @@ namespace FinalProject
             m_zero_node_counter++;
         }
 
-        public void dec_zero_node_counter()
+        public void dec_zero_node_counter(int value = 1)
         {
-            m_zero_node_counter -= 2;
+            m_zero_node_counter -= value;
         }
 
         public override void set_node(Node reference_node)
@@ -254,21 +254,22 @@ namespace FinalProject
                     // 2. we haven't finished traversing the error vector and the EGH tree, so the protocol hasn't finished 
                     // --> traverse a zero tree from the curr_leaf using a zero counter
                     {
-                        if ((error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1)) || (egh_path_to_node[iterate_idx] == (curr_node.get_num_of_children() - 1)))
+                        if ((error_vector[iterate_idx] == (curr_node.get_num_of_children() - 1)) || ((egh_path_to_node[iterate_idx] == (curr_node.get_num_of_children() - 1)) && (error_vector[iterate_idx] == globals.NO_ERROR)))
                         {
-                        // If the next move is 2 (a rewind-if symbol in the EGH tree or in the error vector) - move 2 steps upwards
-                            if (curr_node.get_depth() >= 2)
+                            if (curr_node.get_zero_node_counter() >= (curr_node.get_num_of_children() - 1))
+                                curr_node.dec_zero_node_counter(2);
+                            else if (curr_node.get_zero_node_counter() == 1)
+                            {
+                                curr_node.dec_zero_node_counter(1);
+                                curr_node = (PartyNode)curr_node.get_parent();
+                            }
+                            else if (curr_node.get_zero_node_counter() == 0)
+                            {
                                 curr_node = (PartyNode)curr_node.get_parent().get_parent();
+                            }
                         }
-                       /* else
-                        {
-                            break;  // Protocol starts to send zeroes --> protocol ends with a leaf and the node is REACHABLE
-                        }*/
-                        else if (error_vector[iterate_idx] == globals.NO_ERROR)
-                        // Keep send zeroes
-                            curr_node.inc_zero_node_counter();
-                        else if ((error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && (error_vector[iterate_idx] >= 0))
-                        // If an error occured, "move" to the relevant child
+                        else if ((error_vector[iterate_idx] == globals.NO_ERROR) || ((error_vector[iterate_idx] < (curr_node.get_num_of_children() - 1)) && (error_vector[iterate_idx] >= 0)))
+                            // In case of NO_ERROR: Keep send zeroes, in case of error: "move" to the relevant child
                             curr_node.inc_zero_node_counter();
                         else throw new System.ArgumentException("Can't have an error equals to {0}", error_vector[iterate_idx].ToString());
                     }
